@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conquer Redux 5065</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <div>
+        <p class="eyebrow">Versão 5065</p>
+        <h1>Conquer Redux</h1>
+        <p class="lede">Registro rápido, ranking vivo e doações seguras para o seu servidor clássico.</p>
+        <div class="cta-group">
+          <a class="btn primary" href="#registro">Criar conta</a>
+          <a class="btn ghost" href="#rank">Ver ranking</a>
+        </div>
+      </div>
+      <div class="hero-card">
+        <p class="badge">Online</p>
+        <p class="hero-title">Status do servidor</p>
+        <ul class="stats">
+          <li><span>Jogadores</span><strong>128</strong></li>
+          <li><span>Ping médio</span><strong>42 ms</strong></li>
+          <li><span>Última atualização</span><strong>há 3 min</strong></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="registro" class="section">
+      <div class="container split">
+        <div>
+          <p class="eyebrow">Cadastro</p>
+          <h2>Registre-se em segundos</h2>
+          <p>Formulário simples para criar a conta, já preparado para integrar com o painel ou API do servidor.</p>
+          <ul class="feature-list">
+            <li>Validação básica de campos obrigatórios</li>
+            <li>Espaço para CAPTCHA ou confirmação de e-mail</li>
+            <li>Mensagem de sucesso/erro pronta para personalizar</li>
+          </ul>
+        </div>
+        <form class="card" action="register.php" method="post">
+          <label>Nome de usuário
+            <input name="username" type="text" placeholder="Digite seu usuário" required>
+          </label>
+          <label>Senha
+            <input name="password" type="password" placeholder="Crie uma senha" required>
+          </label>
+          <label>E-mail
+            <input name="email" type="email" placeholder="seu@email.com" required>
+          </label>
+          <button type="submit" class="btn primary block">Criar conta</button>
+          <p class="muted">Personalize o endpoint de ação conforme sua rota ou integração.</p>
+        </form>
+      </div>
+    </section>
+
+    <section id="rank" class="section alt">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Ranking</p>
+            <h2>Top jogadores e guilds</h2>
+            <p>Bloco de tabela pronto para preencher a partir do banco ou serviço de ranking.</p>
+          </div>
+          <div class="pill-group">
+            <button class="pill active">Top 10</button>
+            <button class="pill">Top 50</button>
+            <button class="pill">Guilds</button>
+          </div>
+        </div>
+        <div class="card table-card">
+          <div class="table-head">
+            <span>#</span>
+            <span>Jogador</span>
+            <span>Classe</span>
+            <span>Nível</span>
+            <span>BP</span>
+          </div>
+          <div class="table-body">
+            <div class="row">
+              <span>1</span><span>ShadowFang</span><span>Ninja</span><span>130</span><span>302</span>
+            </div>
+            <div class="row">
+              <span>2</span><span>HeavenlyTao</span><span>Taoist</span><span>129</span><span>296</span>
+            </div>
+            <div class="row">
+              <span>3</span><span>ValorKnight</span><span>Trojan</span><span>128</span><span>291</span>
+            </div>
+            <div class="row">
+              <span>4</span><span>SkyArcher</span><span>Archer</span><span>128</span><span>287</span>
+            </div>
+            <div class="row">
+              <span>5</span><span>IronMonk</span><span>Monk</span><span>127</span><span>282</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="doacoes" class="section">
+      <div class="container split">
+        <div>
+          <p class="eyebrow">Doações</p>
+          <h2>Ajude o servidor a crescer</h2>
+          <p>Chamada clara para apoiar o projeto com valores pré-definidos ou personalizados.</p>
+          <ul class="feature-list">
+            <li>Botões rápidos para PIX/PayPal</li>
+            <li>Campo para código de cupom ou bônus</li>
+            <li>Texto sobre transparência e vantagens in-game</li>
+          </ul>
+        </div>
+        <form class="card" action="/donate" method="post">
+          <label>Valor da doação (R$)
+            <div class="donation-options">
+              <button type="button" class="chip" data-value="20">20</button>
+              <button type="button" class="chip" data-value="50">50</button>
+              <button type="button" class="chip" data-value="100">100</button>
+              <input name="custom" type="number" min="5" step="5" placeholder="Outro valor" required>
+            </div>
+          </label>
+          <label>Método de pagamento
+            <select name="method">
+              <option>PIX</option>
+              <option>PayPal</option>
+              <option>Cartão</option>
+            </select>
+          </label>
+          <label>Código de bônus
+            <input name="coupon" type="text" placeholder="Opcional">
+          </label>
+          <button type="submit" class="btn primary block">Doar agora</button>
+          <p class="muted">Conecte o formulário ao gateway que preferir; mantenha a confirmação de pagamento no painel.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div>
+        <h3>Conquer Redux 5065</h3>
+        <p class="muted">Template estático pronto para integrar com o backend do servidor.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#registro">Registro</a>
+        <a href="#rank">Ranking</a>
+        <a href="#doacoes">Doações</a>
+        <a href="mailto:contato@reduxserver.com">Suporte</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Conecta os botões de valor rápido ao campo numérico
+    document.querySelectorAll('.chip').forEach(button => {
+      button.addEventListener('click', () => {
+        const input = button.parentElement.querySelector('input[type="number"]');
+        input.value = button.dataset.value;
+      });
+    });
+  </script>
+</body>
+</html>
