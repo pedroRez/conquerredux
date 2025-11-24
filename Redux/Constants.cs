@@ -6,7 +6,7 @@ namespace Redux
         public const int EXP_BALL_LIMIT = 10;
         public const uint EMERALD_ID = 1080001, DB_SCROLL_ID = 720028, DRAGONBALL_ID = 1088000, METEOR_SCROLL_ID = 720027, METEOR_ID = 1088001, METEOR_TEAR_ID = 1088002, MOONBOX_ID = 721020, CELESTIAL_STONE_ID = 721259;
         public const bool IsSameSexMarriageAllowed = true;
-        public const int EXP_RATE = 5,
+        public const int EXP_RATE = 3,
                               PROF_RATE = 5,
                               SKILL_RATE = 5,
                               GOLD_RATE = 5;
