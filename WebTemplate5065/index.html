@@ -79,24 +79,10 @@
             <span>Jogador</span>
             <span>Classe</span>
             <span>Nível</span>
-            <span>BP</span>
+            <span>CP</span>
           </div>
-          <div class="table-body">
-            <div class="row">
-              <span>1</span><span>ShadowFang</span><span>Ninja</span><span>130</span><span>302</span>
-            </div>
-            <div class="row">
-              <span>2</span><span>HeavenlyTao</span><span>Taoist</span><span>129</span><span>296</span>
-            </div>
-            <div class="row">
-              <span>3</span><span>ValorKnight</span><span>Trojan</span><span>128</span><span>291</span>
-            </div>
-            <div class="row">
-              <span>4</span><span>SkyArcher</span><span>Archer</span><span>128</span><span>287</span>
-            </div>
-            <div class="row">
-              <span>5</span><span>IronMonk</span><span>Monk</span><span>127</span><span>282</span>
-            </div>
+          <div class="table-body" id="ranking-rows">
+            <div class="row"><span>-</span><span>Carregando...</span><span>-</span><span>-</span><span>-</span></div>
           </div>
         </div>
       </div>
@@ -163,6 +149,54 @@
         input.value = button.dataset.value;
       });
     });
+
+    const professionName = (id) => {
+      const base = Math.floor(id / 10);
+      switch (base) {
+        case 1: return 'Trojan';
+        case 2: return 'Warrior';
+        case 4: return 'Archer';
+        case 5: return 'Ninja';
+        case 6: return 'Monk';
+        case 9: return 'Taoist';
+        default: return `Classe ${id}`;
+      }
+    };
+
+    const rankingBody = document.getElementById('ranking-rows');
+    const renderRanking = (rows) => {
+      rankingBody.innerHTML = '';
+      if (!rows.length) {
+        rankingBody.innerHTML = '<div class="row"><span>-</span><span>Nenhum personagem encontrado</span><span>-</span><span>-</span><span>-</span></div>';
+        return;
+      }
+
+      rows.forEach((row, index) => {
+        const div = document.createElement('div');
+        div.className = 'row';
+        div.innerHTML = `
+          <span>${index + 1}</span>
+          <span>${row.Name}</span>
+          <span>${professionName(parseInt(row.Profession, 10) || 0)}</span>
+          <span>${row.Level}</span>
+          <span>${row.CP ?? 0}</span>
+        `;
+        rankingBody.appendChild(div);
+      });
+    };
+
+    fetch('rank.php')
+      .then((response) => response.json())
+      .then((payload) => {
+        if (payload && Array.isArray(payload.data)) {
+          renderRanking(payload.data);
+        } else {
+          rankingBody.innerHTML = '<div class="row"><span>-</span><span>Não foi possível carregar o ranking</span><span>-</span><span>-</span><span>-</span></div>';
+        }
+      })
+      .catch(() => {
+        rankingBody.innerHTML = '<div class="row"><span>-</span><span>Erro ao consultar rank.php</span><span>-</span><span>-</span><span>-</span></div>';
+      });
   </script>
 </body>
 </html>
