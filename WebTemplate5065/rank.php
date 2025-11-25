@@ -11,7 +11,8 @@ $dbPass = 'trocar_senha';
 
 try {
     $pdo = new PDO(
-        "mysql:host={$dbHost};dbname={$dbName};charset=utf8",
+        // Base restaurada pelo Nov_16_Backup.sql usa latin1.
+        "mysql:host={$dbHost};dbname={$dbName};charset=latin1",
         $dbUser,
         $dbPass,
         [

@@ -21,6 +21,38 @@ $username = trim($_POST['username']);
 $email = trim($_POST['email']);
 $password = $_POST['password'];
 
+// Restrições alinhadas ao schema do Nov_16_Backup.sql (accounts):
+// Username/Password: varchar(16), Email: varchar(64)
+$schemaLimits = [
+    'username' => 16,
+    'password' => 16,
+    'email'    => 64,
+];
+
+if (!preg_match('/^[A-Za-z0-9_]+$/', $username)) {
+    http_response_code(422);
+    echo 'O usuário deve conter apenas letras, números ou _';
+    exit;
+}
+
+if (strlen($username) > $schemaLimits['username']) {
+    http_response_code(422);
+    echo 'O usuário deve ter até 16 caracteres para caber no banco.';
+    exit;
+}
+
+if (strlen($password) > $schemaLimits['password']) {
+    http_response_code(422);
+    echo 'A senha deve ter até 16 caracteres para caber no banco.';
+    exit;
+}
+
+if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > $schemaLimits['email']) {
+    http_response_code(422);
+    echo 'Informe um e-mail válido de até 64 caracteres.';
+    exit;
+}
+
 // Configuração de conexão.
 $dbHost = 'localhost';
 $dbName = 'redux';
@@ -29,7 +61,8 @@ $dbPass = 'trocar_senha';
 
 try {
     $pdo = new PDO(
-        "mysql:host={$dbHost};dbname={$dbName};charset=utf8",
+        // Banco do backup usa charset latin1; mantenha para evitar truncamentos.
+        "mysql:host={$dbHost};dbname={$dbName};charset=latin1",
         $dbUser,
         $dbPass,
         [
