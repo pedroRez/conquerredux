@@ -14,7 +14,8 @@
         <h1>Conquer Redux</h1>
         <p class="lede">Registro rápido, ranking vivo e doações seguras para o seu servidor clássico.</p>
         <div class="cta-group">
-          <a class="btn primary" href="#registro">Criar conta</a>
+          <a class="btn primary" href="download.html">Download cliente</a>
+          <a class="btn ghost" href="#registro">Criar conta</a>
           <a class="btn ghost" href="#rank">Ver ranking</a>
         </div>
       </div>
@@ -31,6 +32,31 @@
   </header>
 
   <main>
+    <section id="login" class="section alt">
+      <div class="container split">
+        <div>
+          <p class="eyebrow">Login</p>
+          <h2>Entre com sua conta do jogo</h2>
+          <p>Faça login com o mesmo usuário e senha do servidor para visualizar o personagem vinculado.</p>
+          <ul class="feature-list">
+            <li>Usa a tabela <code>accounts</code> para validar as credenciais</li>
+            <li>Retorna o personagem relacionado ao UID da conta</li>
+            <li>Sessão de login permanece ativa para consultas subsequentes</li>
+          </ul>
+        </div>
+        <form id="login-form" class="card" method="post" action="login.php">
+          <label>Nome de usuário (até 16 caracteres)
+            <input name="username" type="text" placeholder="Seu usuário" maxlength="16" pattern="[A-Za-z0-9_]+" required>
+          </label>
+          <label>Senha (até 16 caracteres)
+            <input name="password" type="password" placeholder="Sua senha" maxlength="16" required>
+          </label>
+          <button type="submit" class="btn primary block">Entrar</button>
+          <p id="login-feedback" class="muted"></p>
+        </form>
+      </div>
+    </section>
+
     <section id="registro" class="section">
       <div class="container split">
         <div>
@@ -44,14 +70,14 @@
           </ul>
         </div>
         <form class="card" action="register.php" method="post">
-          <label>Nome de usuário
-            <input name="username" type="text" placeholder="Digite seu usuário" required>
+          <label>Nome de usuário (máx. 16 caracteres)
+            <input name="username" type="text" placeholder="Digite seu usuário" maxlength="16" pattern="[A-Za-z0-9_]+" required>
           </label>
-          <label>Senha
-            <input name="password" type="password" placeholder="Crie uma senha" required>
+          <label>Senha (máx. 16 caracteres)
+            <input name="password" type="password" placeholder="Crie uma senha" maxlength="16" required>
           </label>
-          <label>E-mail
-            <input name="email" type="email" placeholder="seu@email.com" required>
+          <label>E-mail (máx. 64 caracteres)
+            <input name="email" type="email" placeholder="seu@email.com" maxlength="64" required>
           </label>
           <button type="submit" class="btn primary block">Criar conta</button>
           <p class="muted">Personalize o endpoint de ação conforme sua rota ou integração.</p>
@@ -67,36 +93,33 @@
             <h2>Top jogadores e guilds</h2>
             <p>Bloco de tabela pronto para preencher a partir do banco ou serviço de ranking.</p>
           </div>
-          <div class="pill-group">
-            <button class="pill active">Top 10</button>
-            <button class="pill">Top 50</button>
-            <button class="pill">Guilds</button>
+          <div class="pill-group" id="ranking-filters">
+            <button class="pill active" data-limit="10">Top 10</button>
+            <button class="pill" data-limit="50">Top 50</button>
           </div>
         </div>
+        <div class="card table-card" id="character-card" style="display:none;">
+          <div class="table-head">
+            <span>Personagem</span>
+            <span>Classe</span>
+            <span>Nível</span>
+            <span>CP</span>
+          </div>
+          <div class="table-body" id="character-body">
+            <div class="row"><span>-</span><span>-</span><span>-</span><span>-</span></div>
+          </div>
+        </div>
+
         <div class="card table-card">
           <div class="table-head">
             <span>#</span>
             <span>Jogador</span>
             <span>Classe</span>
             <span>Nível</span>
-            <span>BP</span>
+            <span>CP</span>
           </div>
-          <div class="table-body">
-            <div class="row">
-              <span>1</span><span>ShadowFang</span><span>Ninja</span><span>130</span><span>302</span>
-            </div>
-            <div class="row">
-              <span>2</span><span>HeavenlyTao</span><span>Taoist</span><span>129</span><span>296</span>
-            </div>
-            <div class="row">
-              <span>3</span><span>ValorKnight</span><span>Trojan</span><span>128</span><span>291</span>
-            </div>
-            <div class="row">
-              <span>4</span><span>SkyArcher</span><span>Archer</span><span>128</span><span>287</span>
-            </div>
-            <div class="row">
-              <span>5</span><span>IronMonk</span><span>Monk</span><span>127</span><span>282</span>
-            </div>
+          <div class="table-body" id="ranking-rows">
+            <div class="row"><span>-</span><span>Carregando...</span><span>-</span><span>-</span><span>-</span></div>
           </div>
         </div>
       </div>
@@ -147,6 +170,7 @@
         <p class="muted">Template estático pronto para integrar com o backend do servidor.</p>
       </div>
       <div class="footer-links">
+        <a href="download.html">Download</a>
         <a href="#registro">Registro</a>
         <a href="#rank">Ranking</a>
         <a href="#doacoes">Doações</a>
@@ -163,6 +187,142 @@
         input.value = button.dataset.value;
       });
     });
+
+    const professionName = (id) => {
+      const base = Math.floor(id / 10);
+      switch (base) {
+        case 1: return 'Trojan';
+        case 2: return 'Warrior';
+        case 4: return 'Archer';
+        case 5: return 'Ninja';
+        case 6: return 'Monk';
+        case 9: return 'Taoist';
+        default: return `Classe ${id}`;
+      }
+    };
+
+    const rankingBody = document.getElementById('ranking-rows');
+    const filters = document.getElementById('ranking-filters');
+    const loginForm = document.getElementById('login-form');
+    const loginFeedback = document.getElementById('login-feedback');
+    const characterCard = document.getElementById('character-card');
+    const characterBody = document.getElementById('character-body');
+
+    const renderRanking = (rows) => {
+      rankingBody.innerHTML = '';
+      if (!rows.length) {
+        rankingBody.innerHTML = '<div class="row"><span>-</span><span>Nenhum personagem encontrado</span><span>-</span><span>-</span><span>-</span></div>';
+        return;
+      }
+
+      rows.forEach((row, index) => {
+        const div = document.createElement('div');
+        div.className = 'row';
+        div.innerHTML = `
+          <span>${index + 1}</span>
+          <span>${row.Name}</span>
+          <span>${professionName(parseInt(row.Profession, 10) || 0)}</span>
+          <span>${row.Level}</span>
+          <span>${row.CP ?? 0}</span>
+        `;
+        rankingBody.appendChild(div);
+      });
+    };
+
+    const fetchRanking = (limit = 10) => {
+      fetch(`rank.php?limit=${limit}`)
+        .then((response) => response.json())
+        .then((payload) => {
+          if (payload && Array.isArray(payload.data)) {
+            renderRanking(payload.data);
+          } else {
+            rankingBody.innerHTML = '<div class="row"><span>-</span><span>Não foi possível carregar o ranking</span><span>-</span><span>-</span><span>-</span></div>';
+          }
+        })
+        .catch(() => {
+          rankingBody.innerHTML = '<div class="row"><span>-</span><span>Erro ao consultar rank.php</span><span>-</span><span>-</span><span>-</span></div>';
+        });
+    };
+
+    const renderCharacter = (data) => {
+      if (!data || !data.Name) {
+        characterCard.style.display = 'none';
+        return;
+      }
+
+      characterCard.style.display = 'block';
+      characterBody.innerHTML = '';
+
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <span>${data.Name}</span>
+        <span>${professionName(parseInt(data.Profession, 10) || 0)}</span>
+        <span>${data.Level}</span>
+        <span>${data.CP ?? 0}</span>
+      `;
+      characterBody.appendChild(row);
+    };
+
+    const fetchCharacter = () => {
+      fetch('character.php', { credentials: 'include' })
+        .then((response) => response.json())
+        .then((payload) => {
+          if (payload && payload.character) {
+            loginFeedback.textContent = payload.message ?? 'Sessão ativa.';
+            renderCharacter(payload.character);
+          }
+        })
+        .catch(() => {
+          // silencioso: apenas não mostra personagem
+        });
+    };
+
+    loginForm?.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(loginForm);
+      const payload = new URLSearchParams();
+      formData.forEach((value, key) => payload.append(key, value.toString()));
+
+      loginFeedback.textContent = 'Validando...';
+
+      fetch('login.php', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: payload.toString(),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.error) {
+            loginFeedback.textContent = data.error;
+            characterCard.style.display = 'none';
+            return;
+          }
+
+          loginFeedback.textContent = data.message ?? 'Login realizado.';
+          renderCharacter(data.character);
+        })
+        .catch(() => {
+          loginFeedback.textContent = 'Não foi possível concluir o login agora.';
+          characterCard.style.display = 'none';
+        });
+    });
+
+    filters?.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-limit]');
+      if (!button) return;
+
+      filters.querySelectorAll('.pill').forEach((pill) => pill.classList.remove('active'));
+      button.classList.add('active');
+
+      const limit = parseInt(button.dataset.limit, 10) || 10;
+      fetchRanking(limit);
+    });
+
+    fetchRanking();
+    fetchCharacter();
   </script>
 </body>
 </html>

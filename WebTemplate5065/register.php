@@ -21,15 +21,48 @@ $username = trim($_POST['username']);
 $email = trim($_POST['email']);
 $password = $_POST['password'];
 
+// Restrições alinhadas ao schema do Nov_16_Backup.sql (accounts):
+// Username/Password: varchar(16), Email: varchar(64)
+$schemaLimits = [
+    'username' => 16,
+    'password' => 16,
+    'email'    => 64,
+];
+
+if (!preg_match('/^[A-Za-z0-9_]+$/', $username)) {
+    http_response_code(422);
+    echo 'O usuário deve conter apenas letras, números ou _';
+    exit;
+}
+
+if (strlen($username) > $schemaLimits['username']) {
+    http_response_code(422);
+    echo 'O usuário deve ter até 16 caracteres para caber no banco.';
+    exit;
+}
+
+if (strlen($password) > $schemaLimits['password']) {
+    http_response_code(422);
+    echo 'A senha deve ter até 16 caracteres para caber no banco.';
+    exit;
+}
+
+if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > $schemaLimits['email']) {
+    http_response_code(422);
+    echo 'Informe um e-mail válido de até 64 caracteres.';
+    exit;
+}
+
 // Configuração de conexão.
 $dbHost = 'localhost';
-$dbName = 'conquerredux';
+$dbName = 'redux';
 $dbUser = 'conquer_user';
 $dbPass = 'trocar_senha';
 
 try {
     $pdo = new PDO(
-        "mysql:host={$dbHost};dbname={$dbName};charset=utf8",
+        // Banco do backup usa charset latin1; mantenha para evitar truncamentos.
+        "mysql:host={$dbHost};dbname={$dbName};charset=latin1",
         $dbUser,
         $dbPass,
         [
@@ -43,19 +76,8 @@ try {
     exit;
 }
 
-// Cria a tabela se não existir (campos mínimos para 5065). Ajuste conforme sua estrutura oficial.
-$pdo->exec(
-    'CREATE TABLE IF NOT EXISTS users (
-        id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        username VARCHAR(32) NOT NULL UNIQUE,
-        email VARCHAR(80) NOT NULL UNIQUE,
-        password_hash VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8'
-);
-
-// Verifica duplicidade.
-$check = $pdo->prepare('SELECT id FROM users WHERE username = :username OR email = :email LIMIT 1');
+// Verifica duplicidade usando a tabela existente restaurada do Nov_16_Backup.sql.
+$check = $pdo->prepare('SELECT UID FROM accounts WHERE Username = :username OR EMail = :email LIMIT 1');
 $check->execute([':username' => $username, ':email' => $email]);
 if ($check->fetch()) {
     http_response_code(409);
@@ -63,14 +85,19 @@ if ($check->fetch()) {
     exit;
 }
 
-// Registra o usuário.
+// Registra o usuário na tabela já criada pelo servidor (Redux espera senha em texto puro; adeque se usar hashing).
 $insert = $pdo->prepare(
-    'INSERT INTO users (username, email, password_hash) VALUES (:username, :email, :hash)'
+    'INSERT INTO accounts (
+        Username, Password, EMail, EmailStatus, Question, Answer, Permission, Token, Timestamp
+    ) VALUES (
+        :username, :password, :email, 0, "", "", 1, 0, :timestamp
+    )'
 );
 $insert->execute([
     ':username' => $username,
     ':email' => $email,
-    ':hash' => password_hash($password, PASSWORD_BCRYPT),
+    ':password' => $password,
+    ':timestamp' => time(),
 ]);
 
 echo 'Cadastro realizado com sucesso. Agora você pode fazer login no servidor.';
