@@ -44,14 +44,14 @@
           </ul>
         </div>
         <form class="card" action="register.php" method="post">
-          <label>Nome de usuário
-            <input name="username" type="text" placeholder="Digite seu usuário" required>
+          <label>Nome de usuário (máx. 16 caracteres)
+            <input name="username" type="text" placeholder="Digite seu usuário" maxlength="16" pattern="[A-Za-z0-9_]+" required>
           </label>
-          <label>Senha
-            <input name="password" type="password" placeholder="Crie uma senha" required>
+          <label>Senha (máx. 16 caracteres)
+            <input name="password" type="password" placeholder="Crie uma senha" maxlength="16" required>
           </label>
-          <label>E-mail
-            <input name="email" type="email" placeholder="seu@email.com" required>
+          <label>E-mail (máx. 64 caracteres)
+            <input name="email" type="email" placeholder="seu@email.com" maxlength="64" required>
           </label>
           <button type="submit" class="btn primary block">Criar conta</button>
           <p class="muted">Personalize o endpoint de ação conforme sua rota ou integração.</p>
@@ -67,10 +67,9 @@
             <h2>Top jogadores e guilds</h2>
             <p>Bloco de tabela pronto para preencher a partir do banco ou serviço de ranking.</p>
           </div>
-          <div class="pill-group">
-            <button class="pill active">Top 10</button>
-            <button class="pill">Top 50</button>
-            <button class="pill">Guilds</button>
+          <div class="pill-group" id="ranking-filters">
+            <button class="pill active" data-limit="10">Top 10</button>
+            <button class="pill" data-limit="50">Top 50</button>
           </div>
         </div>
         <div class="card table-card">
@@ -164,6 +163,8 @@
     };
 
     const rankingBody = document.getElementById('ranking-rows');
+    const filters = document.getElementById('ranking-filters');
+
     const renderRanking = (rows) => {
       rankingBody.innerHTML = '';
       if (!rows.length) {
@@ -185,18 +186,33 @@
       });
     };
 
-    fetch('rank.php')
-      .then((response) => response.json())
-      .then((payload) => {
-        if (payload && Array.isArray(payload.data)) {
-          renderRanking(payload.data);
-        } else {
-          rankingBody.innerHTML = '<div class="row"><span>-</span><span>Não foi possível carregar o ranking</span><span>-</span><span>-</span><span>-</span></div>';
-        }
-      })
-      .catch(() => {
-        rankingBody.innerHTML = '<div class="row"><span>-</span><span>Erro ao consultar rank.php</span><span>-</span><span>-</span><span>-</span></div>';
-      });
+    const fetchRanking = (limit = 10) => {
+      fetch(`rank.php?limit=${limit}`)
+        .then((response) => response.json())
+        .then((payload) => {
+          if (payload && Array.isArray(payload.data)) {
+            renderRanking(payload.data);
+          } else {
+            rankingBody.innerHTML = '<div class="row"><span>-</span><span>Não foi possível carregar o ranking</span><span>-</span><span>-</span><span>-</span></div>';
+          }
+        })
+        .catch(() => {
+          rankingBody.innerHTML = '<div class="row"><span>-</span><span>Erro ao consultar rank.php</span><span>-</span><span>-</span><span>-</span></div>';
+        });
+    };
+
+    filters?.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-limit]');
+      if (!button) return;
+
+      filters.querySelectorAll('.pill').forEach((pill) => pill.classList.remove('active'));
+      button.classList.add('active');
+
+      const limit = parseInt(button.dataset.limit, 10) || 10;
+      fetchRanking(limit);
+    });
+
+    fetchRanking();
   </script>
 </body>
 </html>
