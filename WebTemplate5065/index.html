@@ -31,6 +31,31 @@
   </header>
 
   <main>
+    <section id="login" class="section alt">
+      <div class="container split">
+        <div>
+          <p class="eyebrow">Login</p>
+          <h2>Entre com sua conta do jogo</h2>
+          <p>Faça login com o mesmo usuário e senha do servidor para visualizar o personagem vinculado.</p>
+          <ul class="feature-list">
+            <li>Usa a tabela <code>accounts</code> para validar as credenciais</li>
+            <li>Retorna o personagem relacionado ao UID da conta</li>
+            <li>Sessão de login permanece ativa para consultas subsequentes</li>
+          </ul>
+        </div>
+        <form id="login-form" class="card" method="post" action="login.php">
+          <label>Nome de usuário (até 16 caracteres)
+            <input name="username" type="text" placeholder="Seu usuário" maxlength="16" pattern="[A-Za-z0-9_]+" required>
+          </label>
+          <label>Senha (até 16 caracteres)
+            <input name="password" type="password" placeholder="Sua senha" maxlength="16" required>
+          </label>
+          <button type="submit" class="btn primary block">Entrar</button>
+          <p id="login-feedback" class="muted"></p>
+        </form>
+      </div>
+    </section>
+
     <section id="registro" class="section">
       <div class="container split">
         <div>
@@ -72,6 +97,18 @@
             <button class="pill" data-limit="50">Top 50</button>
           </div>
         </div>
+        <div class="card table-card" id="character-card" style="display:none;">
+          <div class="table-head">
+            <span>Personagem</span>
+            <span>Classe</span>
+            <span>Nível</span>
+            <span>CP</span>
+          </div>
+          <div class="table-body" id="character-body">
+            <div class="row"><span>-</span><span>-</span><span>-</span><span>-</span></div>
+          </div>
+        </div>
+
         <div class="card table-card">
           <div class="table-head">
             <span>#</span>
@@ -164,6 +201,10 @@
 
     const rankingBody = document.getElementById('ranking-rows');
     const filters = document.getElementById('ranking-filters');
+    const loginForm = document.getElementById('login-form');
+    const loginFeedback = document.getElementById('login-feedback');
+    const characterCard = document.getElementById('character-card');
+    const characterBody = document.getElementById('character-body');
 
     const renderRanking = (rows) => {
       rankingBody.innerHTML = '';
@@ -201,6 +242,72 @@
         });
     };
 
+    const renderCharacter = (data) => {
+      if (!data || !data.Name) {
+        characterCard.style.display = 'none';
+        return;
+      }
+
+      characterCard.style.display = 'block';
+      characterBody.innerHTML = '';
+
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <span>${data.Name}</span>
+        <span>${professionName(parseInt(data.Profession, 10) || 0)}</span>
+        <span>${data.Level}</span>
+        <span>${data.CP ?? 0}</span>
+      `;
+      characterBody.appendChild(row);
+    };
+
+    const fetchCharacter = () => {
+      fetch('character.php', { credentials: 'include' })
+        .then((response) => response.json())
+        .then((payload) => {
+          if (payload && payload.character) {
+            loginFeedback.textContent = payload.message ?? 'Sessão ativa.';
+            renderCharacter(payload.character);
+          }
+        })
+        .catch(() => {
+          // silencioso: apenas não mostra personagem
+        });
+    };
+
+    loginForm?.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(loginForm);
+      const payload = new URLSearchParams();
+      formData.forEach((value, key) => payload.append(key, value.toString()));
+
+      loginFeedback.textContent = 'Validando...';
+
+      fetch('login.php', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: payload.toString(),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.error) {
+            loginFeedback.textContent = data.error;
+            characterCard.style.display = 'none';
+            return;
+          }
+
+          loginFeedback.textContent = data.message ?? 'Login realizado.';
+          renderCharacter(data.character);
+        })
+        .catch(() => {
+          loginFeedback.textContent = 'Não foi possível concluir o login agora.';
+          characterCard.style.display = 'none';
+        });
+    });
+
     filters?.addEventListener('click', (event) => {
       const button = event.target.closest('button[data-limit]');
       if (!button) return;
@@ -213,6 +320,7 @@
     });
 
     fetchRanking();
+    fetchCharacter();
   </script>
 </body>
 </html>
