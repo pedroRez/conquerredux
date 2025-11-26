@@ -163,6 +163,20 @@ button, .btn {
 .chip { padding: 12px; border: 1px solid var(--border); background: rgba(12,15,22,0.7); border-radius: 10px; color: var(--text); font-weight: 700; }
 .chip:hover { border-color: var(--accent); color: var(--accent); }
 
+.payment-box { margin-top: 16px; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: rgba(12, 15, 22, 0.75); display: flex; flex-direction: column; gap: 14px; }
+.payment-box__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.payment-box .pill.small { padding: 8px 12px; font-size: 13px; }
+.pix-grid { display: grid; grid-template-columns: 240px 1fr; gap: 16px; align-items: center; }
+.qr-preview { border: 1px dashed var(--border); border-radius: 12px; padding: 12px; display: grid; place-items: center; min-height: 220px; background: rgba(12,15,22,0.5); }
+.qr-preview img { max-width: 100%; height: auto; }
+.pix-actions { display: flex; flex-direction: column; gap: 10px; }
+.copy-row { display: flex; gap: 8px; align-items: center; }
+.copy-row input { flex: 1; }
+.copy-row .btn { white-space: nowrap; }
+.pill.success { background: rgba(122,215,146,0.12); border-color: #7ad792; color: #7ad792; }
+.pill.warning { background: rgba(255, 184, 92, 0.12); border-color: #ffb85c; color: #ffb85c; }
+.pill.error { background: rgba(255, 133, 133, 0.12); border-color: #ff8585; color: #ff8585; }
+
 .footer { border-top: 1px solid var(--border); padding: 24px 0; background: rgba(12,15,22,0.6); }
 .footer .container { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 .footer a { color: var(--accent); text-decoration: none; margin-left: 12px; }
