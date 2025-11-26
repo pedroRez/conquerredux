@@ -45,8 +45,9 @@ namespace Redux
             CHANCE_ELITE = 1.0,
             CHANCE_SUPER = 0.3,
             CHANCE_PLUS = 2.0,
-            CHANCE_METEOR = 0.72,
-            CHANCE_DRAGONBALL = 0.0556,
+            CHANCE_METEOR = 1.0,
+            CHANCE_DRAGONBALL = 0.08,
+            CHANCE_GEAR_DROP = 25,
             CHANCE_POTION = 4,
             CHANCE_REFINED_GEM = 10,
             CHANCE_SUPER_GEM = 1;
