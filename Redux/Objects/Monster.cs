@@ -135,10 +135,11 @@ namespace Redux.Game_Server
                     else
                     {
                         var bonusexp = (uint)(Redux.Common.MulDiv(BaseMonster.Life, 5, 100));
+                        var expRate = Constants.GetExpRateForLevel(p.Level);
                         if (p.Spouse == killer.Spouse)
                             bonusexp *= 2;
                         p.GainExperience(bonusexp);
-                        p.SendMessage("Congratulations you have gained " + bonusexp * Constants.EXP_RATE + " team experience!", ChatType.System);                         
+                        p.SendMessage("Congratulations you have gained " + bonusexp * expRate + " team experience!", ChatType.System);
                     }
             }
             base.Kill(_dieType, _attacker);

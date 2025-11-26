@@ -331,7 +331,8 @@ namespace Redux.Game_Server
             if (Character.HeavenBlessExpires > DateTime.Now)
                 bonus += .2;
             bonus += CombatStats.RainbowGemPct / 100.0;
-            Character.Experience += (ulong)((double)_exp * bonus) * Constants.EXP_RATE;
+            var expRate = Constants.GetExpRateForLevel(Character.Level);
+            Character.Experience += (ulong)((double)_exp * bonus) * (ulong)expRate;
             var requires = ServerDatabase.Context.LevelExp.GetById(Character.Level);
             bool uplev = false;
             while (Character.Level < 130 && Character.Experience >= requires.Experience)
