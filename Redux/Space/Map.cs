@@ -9,6 +9,7 @@ using Redux.Database.Domain;
 using Redux.Game_Server;
 using Redux.Managers;
 using Redux.Enum;
+using Redux.Configuration;
 namespace Redux.Space
 {
     #region Map Class
@@ -49,8 +50,20 @@ namespace Redux.Space
             var dSpawns = ServerDatabase.Context.Spawns.GetSpawnsByMap((ushort)_dynamicID);
             Spawns = new List<SpawnManager>();
             if(dSpawns.Count > 0)
-                foreach (var dSpawn in dSpawns)                
+                foreach (var dSpawn in dSpawns)
                     Spawns.Add(new SpawnManager(dSpawn, this));
+
+            foreach (var extraSpawn in ExtraSpawnLoader.GetSpawnsForMap((ushort)_dynamicID))
+            {
+                // Skip invalid monster IDs so a typo in the JSON does not bring the map down.
+                if (ServerDatabase.Context.Monstertype.GetById(extraSpawn.MonsterType) == null)
+                {
+                    Console.WriteLine("Extra spawn skipped on map {0} because monster {1} was not found.", _dynamicID, extraSpawn.MonsterType);
+                    continue;
+                }
+
+                Spawns.Add(new SpawnManager(extraSpawn, this));
+            }
 
             foreach(var dSob in ServerDatabase.Context.SOB.GetSOBByMap((ushort)_dynamicID))            
                 Insert(new SOB(dSob));
@@ -58,7 +71,8 @@ namespace Redux.Space
             if (MapInfo.Type.HasFlag(MapTypeFlags.MineEnable))            
                 _mineRules = ServerDatabase.Context.DropRules.GetRulesByMonsterType(ID).ToList();
                     
-            Console.WriteLine("Map ID {0} loaded {1} npcs and {2} spawns", _dynamicID, dNpcs.Count, dSpawns.Count);
+            var extraSpawnCount = ExtraSpawnLoader.GetSpawnsForMap((ushort)_dynamicID).Count();
+            Console.WriteLine("Map ID {0} loaded {1} npcs and {2} spawns (+{3} extra)", _dynamicID, dNpcs.Count, dSpawns.Count, extraSpawnCount);
         }
         #endregion
 
