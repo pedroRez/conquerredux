@@ -157,7 +157,8 @@ namespace Redux.Game_Server
             {
                 if (Life > _dmg)
                 {
-                    Life -= (ushort)_dmg;
+                    // Apply the full damage amount without truncating large values.
+                    Life -= _dmg;
                     //Adds blue name for PK
                     //If both are players
                     if (PlayerManager.Players.ContainsKey(_attacker) && (PlayerManager.Players.ContainsKey(this.UID)))
