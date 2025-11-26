@@ -1,0 +1,35 @@
+[
+  {
+    "map": 1000,
+    "monsterType": 203003,
+    "x1": 40,
+    "y1": 280,
+    "x2": 140,
+    "y2": 360,
+    "amountPer": 6,
+    "amountMax": 12,
+    "frequency": 5
+  },
+  {
+    "map": 1000,
+    "monsterType": 203004,
+    "x1": 160,
+    "y1": 250,
+    "x2": 260,
+    "y2": 330,
+    "amountPer": 6,
+    "amountMax": 12,
+    "frequency": 6
+  },
+  {
+    "map": 1000,
+    "monsterType": 203005,
+    "x1": 280,
+    "y1": 220,
+    "x2": 360,
+    "y2": 320,
+    "amountPer": 5,
+    "amountMax": 10,
+    "frequency": 7
+  }
+]
