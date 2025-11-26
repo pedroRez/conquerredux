@@ -200,6 +200,7 @@
     <Compile Include="Enum\NpcType.cs" />
     <Compile Include="Enum\SkillSort.cs" />
     <Compile Include="Enum\Permissions.cs" />
+    <Compile Include="Enum\InterfaceHideFlag.cs" />
     <Compile Include="Enum\PKMode.cs" />
     <Compile Include="Enum\ProfessionType.cs" />
     <Compile Include="Enum\SkillAutoActivation.cs" />
