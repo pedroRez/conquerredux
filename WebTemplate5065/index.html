@@ -233,7 +233,7 @@
             <li>Texto sobre transparência e vantagens in-game</li>
           </ul>
         </div>
-        <form class="card" action="/donate" method="post">
+        <form id="donation-form" class="card" action="/donate" method="post">
           <label>Valor da doação (R$)
             <div class="donation-options">
               <button type="button" class="chip" data-value="20">20</button>
@@ -254,6 +254,29 @@
           </label>
           <button type="submit" class="btn primary block">Doar agora</button>
           <p class="muted">Conecte o formulário ao gateway que preferir; mantenha a confirmação de pagamento no painel.</p>
+          <div id="pix-payment-box" class="payment-box" style="display:none;">
+            <div class="payment-box__header">
+              <div>
+                <p class="eyebrow">Pagamento PIX</p>
+                <p id="pix-instructions" class="muted">Abra seu app bancário, escaneie o QR ou use copia e cola.</p>
+              </div>
+              <span id="pix-status-chip" class="pill small">Aguardando</span>
+            </div>
+            <div class="pix-grid">
+              <div class="qr-preview">
+                <img id="pix-qr" alt="QR Code Pix" src="" />
+              </div>
+              <div class="pix-actions">
+                <p class="muted">Código copia e cola</p>
+                <div class="copy-row">
+                  <input id="pix-copy-field" type="text" readonly value="" />
+                  <button id="pix-copy-button" type="button" class="btn ghost">Copiar</button>
+                </div>
+                <p id="pix-status-text" class="muted">Gerando pagamento Pix...</p>
+                <button id="pix-confirm-button" type="button" class="btn primary" style="display:none;">Pedido liberado</button>
+              </div>
+            </div>
+          </div>
         </form>
       </div>
     </section>
@@ -356,11 +379,151 @@
     const summaryMoney = document.getElementById('summary-money');
     const summaryRank = document.getElementById('summary-rank');
     const summaryDescription = document.getElementById('summary-description');
+    const donationForm = document.getElementById('donation-form');
+    const donationAmountInput = donationForm?.querySelector('input[name="custom"]');
+    const donationMethodSelect = donationForm?.querySelector('select[name="method"]');
+    const pixBox = document.getElementById('pix-payment-box');
+    const pixQr = document.getElementById('pix-qr');
+    const pixCopyField = document.getElementById('pix-copy-field');
+    const pixCopyButton = document.getElementById('pix-copy-button');
+    const pixStatusText = document.getElementById('pix-status-text');
+    const pixStatusChip = document.getElementById('pix-status-chip');
+    const pixConfirmButton = document.getElementById('pix-confirm-button');
+    const pixInstructions = document.getElementById('pix-instructions');
+
+    let paymentPoller;
 
     const state = {
       limit: 10,
       type: 'characters',
       class: '',
+    };
+
+    const setStatusChip = (status) => {
+      if (!pixStatusChip) return;
+      const normalized = (status || '').toLowerCase();
+      pixStatusChip.className = 'pill small';
+
+      if (normalized === 'paid') {
+        pixStatusChip.classList.add('success');
+        pixStatusChip.textContent = 'Pago';
+      } else if (normalized === 'pending' || normalized === 'aguardando') {
+        pixStatusChip.classList.add('warning');
+        pixStatusChip.textContent = 'Aguardando';
+      } else if (normalized === 'processing') {
+        pixStatusChip.classList.add('warning');
+        pixStatusChip.textContent = 'Processando';
+      } else {
+        pixStatusChip.classList.add('error');
+        pixStatusChip.textContent = normalized || 'Erro';
+      }
+    };
+
+    const resetPixUI = () => {
+      if (paymentPoller) {
+        clearInterval(paymentPoller);
+        paymentPoller = null;
+      }
+
+      if (!pixBox) return;
+
+      pixBox.style.display = 'none';
+      if (pixQr) pixQr.src = '';
+      if (pixCopyField) pixCopyField.value = '';
+      if (pixStatusText) pixStatusText.textContent = '';
+      if (pixInstructions) pixInstructions.textContent = 'Abra seu app bancário, escaneie o QR ou use copia e cola.';
+      if (pixConfirmButton) {
+        pixConfirmButton.style.display = 'none';
+        pixConfirmButton.disabled = true;
+      }
+
+      setStatusChip('pending');
+    };
+
+    const revealPixUI = () => {
+      if (pixBox) {
+        pixBox.style.display = 'flex';
+      }
+    };
+
+    const showPaidState = () => {
+      setStatusChip('paid');
+      if (pixStatusText) pixStatusText.textContent = 'Pagamento confirmado! Pedido liberado.';
+      if (pixInstructions) pixInstructions.textContent = 'Pagamento aprovado. Seu pedido foi liberado.';
+      if (pixConfirmButton) {
+        pixConfirmButton.style.display = 'inline-flex';
+        pixConfirmButton.disabled = true;
+      }
+    };
+
+    const startPaymentPolling = (paymentId) => {
+      if (!paymentId) return;
+      if (paymentPoller) clearInterval(paymentPoller);
+
+      paymentPoller = setInterval(async () => {
+        try {
+          const response = await fetch(`/api/payments/${paymentId}`);
+          const payload = await response.json();
+
+          if (!payload || !payload.status) return;
+
+          const status = (payload.status || '').toLowerCase();
+          if (status === 'paid') {
+            showPaidState();
+            clearInterval(paymentPoller);
+            paymentPoller = null;
+            openModal('Pagamento aprovado', 'O pagamento foi confirmado e o pedido foi liberado.');
+          } else {
+            setStatusChip(status);
+            if (pixStatusText) pixStatusText.textContent = 'Aguardando confirmação do pagamento Pix...';
+          }
+        } catch (error) {
+          setStatusChip('erro');
+          if (pixStatusText) pixStatusText.textContent = 'Não foi possível atualizar o status agora.';
+        }
+      }, 4000);
+    };
+
+    const handlePixPayment = async (amount) => {
+      setStatusChip('pending');
+      revealPixUI();
+      if (pixStatusText) pixStatusText.textContent = 'Gerando pagamento Pix...';
+      if (pixInstructions) pixInstructions.textContent = 'Abra seu app bancário, escaneie o QR ou use copia e cola.';
+
+      try {
+        const response = await fetch('/api/payments/pix', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount,
+            description: `Doação Redux R$ ${amount.toFixed(2)}`,
+            order_id: `donation-${Date.now()}`,
+          }),
+        });
+
+        const payload = await response.json().catch(() => null);
+
+        if (!response.ok || !payload) {
+          throw new Error(payload?.error || 'Não foi possível criar o pagamento Pix.');
+        }
+
+        if (pixCopyField) pixCopyField.value = payload.payload || '';
+        if (pixQr && payload.qr_code) {
+          pixQr.src = payload.qr_code;
+        }
+
+        setStatusChip(payload.status || 'pending');
+        if (pixStatusText) pixStatusText.textContent = 'Abra seu app bancário, escaneie o QR ou use copia e cola.';
+
+        if ((payload.status || '').toLowerCase() === 'paid') {
+          showPaidState();
+        } else {
+          startPaymentPolling(payload.payment_id);
+        }
+      } catch (error) {
+        setStatusChip('erro');
+        if (pixStatusText) pixStatusText.textContent = error.message || 'Erro ao gerar pagamento Pix.';
+      }
     };
 
     if (registerTimestamp) {
@@ -547,6 +710,45 @@
           sessionMessage.textContent = 'Não foi possível encerrar a sessão agora.';
           openModal('Erro', 'Não foi possível encerrar a sessão agora.');
         });
+    });
+
+    pixCopyButton?.addEventListener('click', async () => {
+      if (!pixCopyField?.value) return;
+
+      try {
+        await navigator.clipboard.writeText(pixCopyField.value);
+        if (pixStatusText) pixStatusText.textContent = 'Código copiado para a área de transferência.';
+      } catch (err) {
+        pixCopyField.select();
+        document.execCommand('copy');
+        if (pixStatusText) pixStatusText.textContent = 'Código copiado.';
+      }
+    });
+
+    pixConfirmButton?.addEventListener('click', () => {
+      openModal('Pedido liberado', 'Pagamento Pix confirmado. Seu pedido já foi liberado.');
+    });
+
+    donationForm?.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      if (donationMethodSelect && donationMethodSelect.value !== 'PIX') {
+        openModal('Método não suportado', 'Use o método PIX para gerar o QR Code e o código copia e cola.');
+        return;
+      }
+
+      const amount = parseFloat(donationAmountInput?.value || '0');
+      if (!amount || amount <= 0) {
+        openModal('Valor inválido', 'Informe um valor de doação maior que zero para gerar o Pix.');
+        return;
+      }
+
+      if (paymentPoller) {
+        clearInterval(paymentPoller);
+        paymentPoller = null;
+      }
+
+      handlePixPayment(amount);
     });
 
     const registerForm = document.getElementById('register-form');
