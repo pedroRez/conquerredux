@@ -3,6 +3,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
+using System.Linq;
 using Redux.Database.Domain;
 using Redux.Database;
 using Redux.Space;
@@ -952,6 +953,30 @@ namespace Redux.Game_Server
             if (_updateClient)
                 Send(ItemActionPacket.Create(_item.UniqueID, _item.StaticID, ItemAction.RemoveInventory));
             return Inventory.TryRemove(_item.UniqueID, out _item);
+        }
+        #endregion
+
+        #region Auto Equip Arrows
+        public bool TryAutoEquipArrow(uint? preferredStaticId = null)
+        {
+            ConquerItem arrow = null;
+
+            if (preferredStaticId.HasValue)
+                arrow = Inventory.Values.FirstOrDefault(item => item.EquipmentType == 1050 && item.StaticID == preferredStaticId.Value);
+
+            if (arrow == null)
+                arrow = Inventory.Values.FirstOrDefault(item => item.EquipmentType == 1050);
+
+            if (arrow == null)
+                return false;
+
+            if (Equipment.EquipItem(arrow, 5))
+            {
+                RemoveItem(arrow);
+                return true;
+            }
+
+            return false;
         }
         #endregion
 

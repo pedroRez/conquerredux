@@ -726,10 +726,20 @@ namespace Redux.Managers
                 {
                     ConquerItem item;
                     owner.Equipment.TryGetItemBySlot(5, out item);
+
+                    if ((item == null || item.Durability < 1) && owner is Player)
+                    {
+                        var player = (Player)owner;
+                        if (player.TryAutoEquipArrow(item == null ? (uint?)null : item.StaticID))
+                            owner.Equipment.TryGetItemBySlot(5, out item);
+                    }
+
                     if (item == null || item.Durability < 1)
                     {
                         AbortAttack(); return;
                     }
+
+                    var previousArrowType = item.StaticID;
                     if (!owner.Map.IsTGMap)
                     {
                         item.Durability -= 1;
@@ -738,6 +748,7 @@ namespace Redux.Managers
                         {
                             owner.Equipment.UnequipItem(5);
                             (owner as Player).DeleteItem(item);
+                            (owner as Player).TryAutoEquipArrow(previousArrowType);
                         }
                     }
                     dmg = owner.CalculateBowDamage(target, null, true);
@@ -906,6 +917,12 @@ namespace Redux.Managers
                 {
                     ConquerItem item;
                     owner.Equipment.TryGetItemBySlot(5, out item);
+                    if ((item == null || item.Durability - _magicType.UseItemNum < 0) && owner is Player)
+                    {
+                        var player = (Player)owner;
+                        if (player.TryAutoEquipArrow(item == null ? (uint?)null : item.StaticID))
+                            owner.Equipment.TryGetItemBySlot(5, out item);
+                    }
                     if (item == null)
                         return false;
                     if (item.Durability - _magicType.UseItemNum < 0)
@@ -933,15 +950,24 @@ namespace Redux.Managers
                 {
                     ConquerItem item;
                     owner.Equipment.TryGetItemBySlot(5, out item);
+                    if ((item == null || item.Durability - _magicType.UseItemNum < 0) && owner is Player)
+                    {
+                        var player = (Player)owner;
+                        if (player.TryAutoEquipArrow(item == null ? (uint?)null : item.StaticID))
+                            owner.Equipment.TryGetItemBySlot(5, out item);
+                    }
+
                     if (item == null)
                         return false;
 
+                    var previousArrowType = item.StaticID;
                     item.Durability -= _magicType.UseItemNum;
                     owner.Send(ItemInformationPacket.Create(item, ItemInfoAction.Update));
                     if (item.Durability == 0)
                     {
                         owner.Equipment.UnequipItem(5);
                         (owner as Player).DeleteItem(item);
+                        (owner as Player).TryAutoEquipArrow(previousArrowType);
                     }
                 }
             }
