@@ -17,6 +17,21 @@ foreach ($required as $field) {
     }
 }
 
+$honeypot = isset($_POST['website']) ? trim($_POST['website']) : '';
+if ($honeypot !== '') {
+    http_response_code(400);
+    echo 'Requisição recusada.';
+    exit;
+}
+
+$formTimestamp = isset($_POST['form_ts']) ? (int) $_POST['form_ts'] : 0;
+// Valor vem em milissegundos; exige ao menos 3s entre carregar e enviar o formulário.
+if ($formTimestamp <= 0 || (time() - (int) floor($formTimestamp / 1000)) < 3) {
+    http_response_code(400);
+    echo 'Formulário enviado rápido demais. Confirme que não é um robô e tente novamente.';
+    exit;
+}
+
 $username = trim($_POST['username']);
 $email = trim($_POST['email']);
 $password = $_POST['password'];
