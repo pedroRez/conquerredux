@@ -52,14 +52,20 @@ namespace Redux.Managers
             TopLeft = new Point(_baseSpawn.X1, _baseSpawn.Y1);
             BottomRight = new Point(_baseSpawn.X2, _baseSpawn.Y2);
             Frequency = _baseSpawn.Frequency;
-            AmountPer = _baseSpawn.AmountPer;
-            AmountMax = _baseSpawn.AmountMax;
+            AmountPer = ApplySpawnMultiplier(_baseSpawn.AmountPer);
+            AmountMax = ApplySpawnMultiplier(_baseSpawn.AmountMax);
             DeadMembers = new Queue<Monster>();
             DyingMembers = new ConcurrentDictionary<uint, Monster>();
             AliveMembers = new ConcurrentDictionary<uint, Monster>();
             Map = _map;
             for (int i = 0; i < AmountMax; i++)
                 DeadMembers.Enqueue(new Monster(BaseType, this));
+        }
+
+        private int ApplySpawnMultiplier(int baseAmount)
+        {
+            var scaled = (int)Math.Round(baseAmount * Constants.MONSTER_SPAWN_MULTIPLIER);
+            return Math.Max(1, scaled);
         }
 
         public void SpawnManager_Timer()
