@@ -10,5 +10,6 @@ namespace Redux.Database.Models
         public virtual uint RewardValue { get; set; }
         public virtual DateTime GrantedAt { get; set; }
         public virtual bool Delivered { get; set; }
+        public virtual DateTime? DeliveredAt { get; set; }
     }
 }

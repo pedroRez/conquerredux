@@ -7,6 +7,7 @@ using Redux.Structures;
 using Redux.Database;
 using Redux.Database.Domain;
 using Redux.Database.Repositories;
+using Redux.Managers;
 namespace Redux
 {
     public static class Commands
@@ -60,6 +61,7 @@ namespace Redux
                 {"summon", Process_Summon},
                 {"string", Process_String},
                 {"addspawn", Process_AddSpawn},
+                {"claimrewards", Process_ClaimRewards},
             };
         }
         private static void Process_Exit(Player client, string[] command)
@@ -728,6 +730,16 @@ namespace Redux
                 }
 
             }
-        }      
+        }
+
+        private static void Process_ClaimRewards(Player client, string[] command)
+        {
+            var delivered = EventRewardManager.ClaimRewards(client);
+
+            if (delivered > 0)
+                client.SendMessage($"Você resgatou {delivered} recompensa(s) de evento.");
+            else
+                client.SendMessage("Nenhuma recompensa de evento pendente.");
+        }
     }
 }

@@ -39,6 +39,8 @@ namespace Redux.Game_Server
             t.CreateThread();
 
             //Start monster thread
+            var rewardThread = new Threading.EventRewardThread();
+            rewardThread.CreateThread();
         }
         #endregion
         #region Client Connect

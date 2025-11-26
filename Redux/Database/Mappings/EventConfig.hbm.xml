@@ -11,6 +11,9 @@
     <property name="Title" column="title" />
     <property name="MaxSignups" column="max_signups" />
     <property name="MaxTicketsPerPlayer" column="max_tickets_per_player" />
+    <property name="WinnersCount" column="winners_count" />
+    <property name="RewardType" column="reward_type" />
+    <property name="RewardValue" column="reward_value" />
     <property name="StartsAt" column="starts_at" />
     <property name="EndsAt" column="ends_at" />
     <property name="CreatedAt" column="created_at" />
