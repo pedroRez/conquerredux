@@ -9,7 +9,8 @@ namespace Redux.Database
     public static class DatabaseMigrator
     {
         private const string ScriptsFolder = "Database";
-        private const string EventScriptName = "Scripts" + Path.DirectorySeparatorChar + "EventTables.sql";
+        private const string EventScriptDirectory = "Scripts";
+        private const string EventScriptName = "EventTables.sql";
 
         public static void EnsureEventTables()
         {
@@ -37,11 +38,11 @@ namespace Redux.Database
             try
             {
                 var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                var candidate = Path.Combine(baseDirectory, ScriptsFolder, EventScriptName);
+                var candidate = Path.Combine(baseDirectory, ScriptsFolder, EventScriptDirectory, EventScriptName);
                 if (File.Exists(candidate))
                     return candidate;
 
-                var fallback = Path.Combine(baseDirectory, EventScriptName);
+                var fallback = Path.Combine(baseDirectory, EventScriptDirectory, EventScriptName);
                 if (File.Exists(fallback))
                     return fallback;
             }
