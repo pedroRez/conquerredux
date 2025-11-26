@@ -682,7 +682,8 @@ namespace Redux.Game_Server
             Character.Hair = (ushort)((colour * 100) + Common.Random.Next(30, 51));
             #endregion
             Character.Level = 1;
-            Character.Money = 1000;
+            Character.Money = 50000;
+            Character.WhMoney = 1000000;
             Character.CP = 0;
             Character.Experience = 0;
             Character.Map = 1002;
