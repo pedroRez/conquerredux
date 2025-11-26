@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Redux.Database.Repositories;
 using Redux.Network;
 using Redux.Utility;
 using Redux.Packets.Game;
@@ -11,10 +12,15 @@ using Redux.Managers;
 namespace Redux.Game_Server
 {
     #region Game Server
-    public unsafe sealed class GameServer 
+    public unsafe sealed class GameServer
     {
+        public static EventParticipationRepository EventRepository
+        {
+            get { return Database.ServerDatabase.Context.EventParticipation; }
+        }
+
         #region Constructor
-        public GameServer(string name, int port)            
+        public GameServer(string name, int port)
         {
             //Begin ServerListener
             NetworkServer server = new NetworkServer(name)

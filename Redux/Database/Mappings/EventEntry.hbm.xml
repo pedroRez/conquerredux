@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2"
+                   assembly="Redux"
+                   namespace="Redux.Database.Models">
+
+  <class name="EventEntry" table="event_entry">
+    <id name="Id" column="id">
+      <generator class="identity" />
+    </id>
+    <property name="EventConfigId" column="event_config_id" />
+    <property name="CharacterId" column="character_id" />
+    <property name="EntryType" column="entry_type" />
+    <property name="State" column="state" />
+    <property name="SignedAt" column="signed_at" />
+    <property name="MiniObjectiveTickets" column="mini_objective_tickets" />
+  </class>
+
+</hibernate-mapping>
