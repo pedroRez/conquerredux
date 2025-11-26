@@ -11,6 +11,9 @@ namespace Redux
                               SKILL_RATE = 5,
                               GOLD_RATE = 5;
 
+        // Multiplier applied to monster spawn counts when maps are initialized.
+        public const double MONSTER_SPAWN_MULTIPLIER = 1.5;
+
         public const double SOCKET_RATE = .4,
             CHANCE_REFINED = 10.0,
             CHANCE_UNIQUE = 6.0,
