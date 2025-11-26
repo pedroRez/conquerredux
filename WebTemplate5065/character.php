@@ -9,6 +9,11 @@ if (!isset($_SESSION['account_uid'])) {
     exit;
 }
 
+$account = [
+    'uid' => $_SESSION['account_uid'],
+    'username' => $_SESSION['account_username'] ?? null,
+];
+
 $dbHost = 'localhost';
 $dbName = 'redux';
 $dbUser = 'conquer_user';
@@ -39,6 +44,7 @@ $character = $characterStmt->fetch();
 if (!$character) {
     echo json_encode([
         'message' => 'Sessão ativa, mas nenhum personagem foi encontrado para essa conta.',
+        'account' => $account,
         'character' => null,
     ]);
     exit;
@@ -46,5 +52,6 @@ if (!$character) {
 
 echo json_encode([
     'message' => 'Sessão ativa. Personagem recuperado com sucesso.',
+    'account' => $account,
     'character' => $character,
 ]);

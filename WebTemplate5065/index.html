@@ -44,16 +44,32 @@
             <li>Sessão de login permanece ativa para consultas subsequentes</li>
           </ul>
         </div>
-        <form id="login-form" class="card" method="post" action="login.php">
-          <label>Nome de usuário (até 16 caracteres)
-            <input name="username" type="text" placeholder="Seu usuário" maxlength="16" pattern="[A-Za-z0-9_]+" required>
-          </label>
-          <label>Senha (até 16 caracteres)
-            <input name="password" type="password" placeholder="Sua senha" maxlength="16" required>
-          </label>
-          <button type="submit" class="btn primary block">Entrar</button>
-          <p id="login-feedback" class="muted"></p>
-        </form>
+        <div class="card-stack">
+          <form id="login-form" class="card" method="post" action="login.php">
+            <label>Nome de usuário (até 16 caracteres)
+              <input name="username" type="text" placeholder="Seu usuário" maxlength="16" pattern="[A-Za-z0-9_]+" required>
+            </label>
+            <label>Senha (até 16 caracteres)
+              <input name="password" type="password" placeholder="Sua senha" maxlength="16" required>
+            </label>
+            <button type="submit" class="btn primary block">Entrar</button>
+            <p id="login-feedback" class="muted"></p>
+          </form>
+
+          <div id="session-card" class="card" style="display:none;">
+            <div class="session-header">
+              <div>
+                <p class="eyebrow">Sessão ativa</p>
+                <p id="session-message" class="muted">Login realizado.</p>
+              </div>
+              <button id="logout-button" type="button" class="btn ghost">Sair</button>
+            </div>
+            <div class="session-row">
+              <span>Usuário</span>
+              <strong id="session-username">-</strong>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -69,7 +85,7 @@
             <li>Mensagem de sucesso/erro pronta para personalizar</li>
           </ul>
         </div>
-        <form class="card" action="register.php" method="post">
+        <form id="register-form" class="card" action="register.php" method="post">
           <label>Nome de usuário (máx. 16 caracteres)
             <input name="username" type="text" placeholder="Digite seu usuário" maxlength="16" pattern="[A-Za-z0-9_]+" required>
           </label>
@@ -79,6 +95,12 @@
           <label>E-mail (máx. 64 caracteres)
             <input name="email" type="email" placeholder="seu@email.com" maxlength="64" required>
           </label>
+          <div class="sr-only">
+            <label>Deixe este campo vazio (proteção contra bots)
+              <input type="text" name="website" tabindex="-1" autocomplete="off">
+            </label>
+          </div>
+          <input type="hidden" id="register-form-ts" name="form_ts" value="">
           <button type="submit" class="btn primary block">Criar conta</button>
           <p class="muted">Personalize o endpoint de ação conforme sua rota ou integração.</p>
         </form>
@@ -243,12 +265,21 @@
     const loginFeedback = document.getElementById('login-feedback');
     const characterCard = document.getElementById('character-card');
     const characterBody = document.getElementById('character-body');
+    const sessionCard = document.getElementById('session-card');
+    const sessionMessage = document.getElementById('session-message');
+    const sessionUsername = document.getElementById('session-username');
+    const logoutButton = document.getElementById('logout-button');
+    const registerTimestamp = document.getElementById('register-form-ts');
 
     const state = {
       limit: 10,
       type: 'characters',
       class: '',
     };
+
+    if (registerTimestamp) {
+      registerTimestamp.value = Date.now().toString();
+    }
 
     const renderRanking = (rows) => {
       rankingBody.innerHTML = '';
@@ -353,14 +384,34 @@
       characterBody.appendChild(row);
     };
 
+    const showLoggedOutView = () => {
+      loginForm.style.display = 'block';
+      loginForm.reset();
+      sessionCard.style.display = 'none';
+      loginFeedback.textContent = '';
+      characterCard.style.display = 'none';
+    };
+
+    const showLoggedInView = (account, character, message) => {
+      loginForm.style.display = 'none';
+      sessionCard.style.display = 'block';
+      sessionMessage.textContent = message ?? 'Sessão ativa.';
+      sessionUsername.textContent = account?.username ?? 'Jogador';
+      renderCharacter(character);
+    };
+
     const fetchCharacter = () => {
       fetch('character.php', { credentials: 'include' })
-        .then((response) => response.json())
-        .then((payload) => {
-          if (payload && payload.character) {
-            loginFeedback.textContent = payload.message ?? 'Sessão ativa.';
-            renderCharacter(payload.character);
+        .then((response) => {
+          if (response.status === 401) {
+            showLoggedOutView();
+            return null;
           }
+          return response.json();
+        })
+        .then((payload) => {
+          if (!payload) return;
+          showLoggedInView(payload.account, payload.character, payload.message);
         })
         .catch(() => {
           // silencioso: apenas não mostra personagem
@@ -390,12 +441,23 @@
             return;
           }
 
-          loginFeedback.textContent = data.message ?? 'Login realizado.';
-          renderCharacter(data.character);
+          showLoggedInView(data.account, data.character, data.message ?? 'Login realizado.');
         })
         .catch(() => {
           loginFeedback.textContent = 'Não foi possível concluir o login agora.';
           characterCard.style.display = 'none';
+        });
+    });
+
+    logoutButton?.addEventListener('click', () => {
+      fetch('logout.php', { method: 'POST', credentials: 'include' })
+        .then((response) => response.json())
+        .then((payload) => {
+          showLoggedOutView();
+          loginFeedback.textContent = payload?.message ?? 'Sessão encerrada.';
+        })
+        .catch(() => {
+          sessionMessage.textContent = 'Não foi possível encerrar a sessão agora.';
         });
     });
 
