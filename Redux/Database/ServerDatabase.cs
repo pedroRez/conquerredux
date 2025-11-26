@@ -11,6 +11,8 @@ namespace Redux.Database
             Context = new ConquerDataContext();
             NHibernateHelper.BuildSessionFactory();
 
+            DatabaseMigrator.EnsureEventTables();
+
             // Initialize the item generator seed before any new items are created
             Context.Items.PopulateItemGenerator();
 
