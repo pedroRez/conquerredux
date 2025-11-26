@@ -132,6 +132,10 @@ namespace Redux.Managers
             if (location == 5)
             {
                 bool canEq = false;
+                //Off-hand cannot be used while a two-handed weapon is equipped in the main hand.
+                if (equippedItems[4] != null && DropManager.TwoHandWeaponTypes.Contains(equippedItems[4].EquipmentType))
+                    return false;
+
                 switch (Owner.ProfessionType)
                 {
                     case ProfessionType.Trojan:
