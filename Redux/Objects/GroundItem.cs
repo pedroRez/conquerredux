@@ -49,6 +49,9 @@ namespace Redux.Game_Server
             {
                 if (!entity.VisibleObjects.ContainsKey(UID))
                     entity.VisibleObjects.TryAdd(UID, UID);
+                var displayName = Item.GetDisplayNameWithQuality();
+                if (!string.IsNullOrEmpty(displayName))
+                    entity.Send(StringsPacket.Create(UID, StringAction.MapEffect, displayName));
                 entity.Send(SpawnPacket);
             }
             Common.MapService.AddFlag((ushort)Map.ID, (ushort)Location.X, (ushort)Location.Y, TinyMap.TileFlag.Item);

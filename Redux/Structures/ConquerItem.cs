@@ -82,6 +82,29 @@ namespace Redux.Structures
         {
             return BaseItem.Name;
         }
+
+        public string GetQualityPrefix()
+        {
+            switch (EquipmentQuality)
+            {
+                case 6:
+                    return "[R]";
+                case 7:
+                    return "[U]";
+                case 8:
+                    return "[E]";
+                case 9:
+                    return "[S]";
+                default:
+                    return string.Empty;
+            }
+        }
+
+        public string GetDisplayNameWithQuality()
+        {
+            var prefix = GetQualityPrefix();
+            return string.IsNullOrEmpty(prefix) ? BaseItem.Name : string.Format("{0} {1}", prefix, BaseItem.Name);
+        }
         public void ChangeItemID(uint _id)
         {
             StaticID = _id;
