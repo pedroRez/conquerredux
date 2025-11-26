@@ -1536,11 +1536,15 @@ namespace Redux.Game_Server
                         client.Send(ItemInformationPacket.Create(item, ItemInfoAction.Update));
                         item.Save();
                     }
-                    if (packet.Location == 2 && item.Gem2 > 0)
+                    else if (packet.Location == 2 && item.Gem2 > 0)
                     {
                         item.Gem2 = 255;
                         client.Send(ItemInformationPacket.Create(item, ItemInfoAction.Update));
                         item.Save();
+                    }
+                    else
+                    {
+                        client.Send(new TalkPacket(ChatType.System, "Nenhuma gema para remover nesse slot.", ChatColour.Red));
                     }
                     break;
                 #endregion
@@ -1548,8 +1552,11 @@ namespace Redux.Game_Server
                 case SocketGemAction.AddGem:
                     var gem = client.GetItemByUID(packet.GemID);
                     if (gem == null)
+                    {
+                        client.Send(new TalkPacket(ChatType.System, "Gema não encontrada no inventário.", ChatColour.Red));
                         return;
-                    if (packet.Location == 1 && item.Gem1 == 255)
+                    }
+                    if (packet.Location == 1 && (item.Gem1 == 0 || item.Gem1 == 255))
                     {
                         item.Gem1 = (byte)(gem.StaticID % 1000);
                         client.RemoveItem(gem);
@@ -1557,13 +1564,21 @@ namespace Redux.Game_Server
                         item.Save();
                         gem.Delete();
                     }
-                    else if (packet.Location == 2 && item.Gem2 == 255)
+                    else if (packet.Location == 2 && (item.Gem2 == 0 || item.Gem2 == 255))
                     {
                         item.Gem2 = (byte)(gem.StaticID % 1000);
                         client.RemoveItem(gem);
                         client.Send(ItemInformationPacket.Create(item, ItemInfoAction.Update));
                         item.Save();
                         gem.Delete();
+                    }
+                    else if (packet.Location == 1 || packet.Location == 2)
+                    {
+                        client.Send(new TalkPacket(ChatType.System, "O slot de gema já está ocupado ou indisponível.", ChatColour.Red));
+                    }
+                    else
+                    {
+                        client.Send(new TalkPacket(ChatType.System, "Slot de gema inválido.", ChatColour.Red));
                     }
                     break;
                 #endregion
