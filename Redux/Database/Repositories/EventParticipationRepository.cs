@@ -56,7 +56,7 @@ namespace Redux.Database.Repositories
                         throw new InvalidOperationException("The event has reached its maximum number of signups.");
                 }
 
-                var entry = new EventEntry
+                var newEntry = new EventEntry
                 {
                     EventConfigId = configId,
                     CharacterId = characterId,
@@ -66,9 +66,9 @@ namespace Redux.Database.Repositories
                     MiniObjectiveTickets = 0
                 };
 
-                session.Save(entry);
+                session.Save(newEntry);
                 transaction.Commit();
-                return entry;
+                return newEntry;
             }
         }
 
