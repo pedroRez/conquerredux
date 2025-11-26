@@ -110,6 +110,7 @@ foreach ($rewards as $reward) {
 - Mostre `reward_summary` e probabilidade base do sorteio na página/NPC.
 - Informe quantos tickets o jogador possui e os horários de encerramento (`start_at`/`end_at`).
 - Anuncie automaticamente os vencedores lendo `event_reward` após a apuração.
+- No servidor Redux, há um job interno que roda a apuração ponderada por tickets e um comando `/claimrewards` para resgatar itens pendentes, marcando `delivered`/`delivered_at` para auditoria.
 
 ## Checklist rápido para cada evento
 - [ ] Cadastrar `event_config` com janela de tempo e limite de tickets.

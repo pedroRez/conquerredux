@@ -12,6 +12,7 @@
     <property name="RewardValue" column="reward_value" />
     <property name="GrantedAt" column="granted_at" />
     <property name="Delivered" column="delivered" />
+    <property name="DeliveredAt" column="delivered_at" />
   </class>
 
 </hibernate-mapping>

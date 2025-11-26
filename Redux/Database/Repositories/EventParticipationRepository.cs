@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Redux.Database.Models;
+using NHibernate.Criterion;
 
 namespace Redux.Database.Repositories
 {
@@ -15,12 +16,37 @@ namespace Redux.Database.Repositories
             if (config.CreatedAt == DateTime.MinValue)
                 config.CreatedAt = DateTime.UtcNow;
 
+            if (string.IsNullOrWhiteSpace(config.RewardType))
+                config.RewardType = "ITEM";
+
+            if (config.WinnersCount == 0)
+                config.WinnersCount = 1;
+
             using (var session = NHibernateHelper.OpenSession())
             using (var transaction = session.BeginTransaction())
             {
                 session.SaveOrUpdate(config);
                 transaction.Commit();
                 return config;
+            }
+        }
+
+        public EventConfig GetConfig(uint configId)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+            {
+                return session.Get<EventConfig>(configId);
+            }
+        }
+
+        public IList<EventConfig> ListConfigsToDraw(DateTime referenceTime)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+            {
+                return session
+                    .QueryOver<EventConfig>()
+                    .Where(config => config.Status == "ACTIVE" && config.EndsAt <= referenceTime)
+                    .List();
             }
         }
 
@@ -72,6 +98,27 @@ namespace Redux.Database.Repositories
             }
         }
 
+        public bool HasRewards(uint configId)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+            {
+                var entryIds = session
+                    .QueryOver<EventEntry>()
+                    .Where(entry => entry.EventConfigId == configId)
+                    .Select(entry => entry.Id)
+                    .List<uint>();
+
+                if (entryIds.Count == 0)
+                    return false;
+
+                return session
+                    .QueryOver<EventReward>()
+                    .WhereRestrictionOn(reward => reward.EventEntryId)
+                    .IsIn(entryIds.ToArray())
+                    .RowCount() > 0;
+            }
+        }
+
         public EventEntry IncrementMiniObjectiveTickets(uint entryId, int amount)
         {
             using (var session = NHibernateHelper.OpenSession())
@@ -93,6 +140,22 @@ namespace Redux.Database.Repositories
                 session.Update(entry);
                 transaction.Commit();
                 return entry;
+            }
+        }
+
+        public void MarkConfigInactive(uint configId)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+            using (var transaction = session.BeginTransaction())
+            {
+                var config = session.Get<EventConfig>(configId);
+                if (config != null)
+                {
+                    config.Status = "INACTIVE";
+                    session.SaveOrUpdate(config);
+                }
+
+                transaction.Commit();
             }
         }
 
@@ -128,6 +191,8 @@ namespace Redux.Database.Repositories
                 foreach (var reward in rewards.Where(r => r != null))
                 {
                     reward.EventEntryId = entryId;
+                    if (reward.GrantedAt == DateTime.MinValue)
+                        reward.GrantedAt = DateTime.UtcNow;
                     session.SaveOrUpdate(reward);
                     persistedRewards.Add(reward);
                 }
@@ -137,15 +202,45 @@ namespace Redux.Database.Repositories
             }
         }
 
-        public int MarkDelivered(uint entryId)
+        public IList<EventReward> ListUndeliveredRewards(uint characterId)
         {
+            using (var session = NHibernateHelper.OpenSession())
+            {
+                var entryIds = session
+                    .QueryOver<EventEntry>()
+                    .Where(entry => entry.CharacterId == characterId)
+                    .Select(entry => entry.Id)
+                    .List<uint>();
+
+                if (entryIds.Count == 0)
+                    return new List<EventReward>();
+
+                return session
+                    .QueryOver<EventReward>()
+                    .Where(reward => reward.Delivered == false)
+                    .WhereRestrictionOn(reward => reward.EventEntryId)
+                    .IsIn(entryIds.ToArray())
+                    .List();
+            }
+        }
+
+        public int MarkDelivered(IEnumerable<uint> rewardIds, DateTime deliveredAt)
+        {
+            if (rewardIds == null)
+                return 0;
+
+            var ids = rewardIds.ToArray();
+            if (ids.Length == 0)
+                return 0;
+
             using (var session = NHibernateHelper.OpenSession())
             using (var transaction = session.BeginTransaction())
             {
                 var affected = session
-                    .CreateQuery("update Redux.Database.Models.EventReward set Delivered = :delivered where EventEntryId = :entryId")
+                    .CreateQuery("update Redux.Database.Models.EventReward set Delivered = :delivered, DeliveredAt = :deliveredAt where Id in (:rewardIds)")
                     .SetParameter("delivered", true)
-                    .SetParameter("entryId", entryId)
+                    .SetParameter("deliveredAt", deliveredAt)
+                    .SetParameterList("rewardIds", ids)
                     .ExecuteUpdate();
 
                 transaction.Commit();
