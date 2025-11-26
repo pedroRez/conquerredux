@@ -29,19 +29,60 @@ try {
 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
 $limit = max(1, min($limit, 50));
 
-try {
-    $stmt = $pdo->prepare(
-        'SELECT Name, Profession, Level, CP, Experience
-         FROM characters
-         ORDER BY Level DESC, Experience DESC, CP DESC
-         LIMIT :limit'
-    );
-    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-    $stmt->execute();
-    $rows = $stmt->fetchAll();
+$type = isset($_GET['type']) ? strtolower(trim($_GET['type'])) : 'characters';
+$type = in_array($type, ['characters', 'guilds'], true) ? $type : 'characters';
 
-    echo json_encode(['data' => $rows]);
+// Para classe, usamos a base (1=Trojans, 2=Warriors, 4=Archers, 5=Ninjas, 6=Monks, 9=Taoists).
+$allowedClasses = [1, 2, 4, 5, 6, 9];
+$classFilter = null;
+if ($type === 'characters' && isset($_GET['class']) && $_GET['class'] !== '') {
+    $candidate = (int) $_GET['class'];
+    if (in_array($candidate, $allowedClasses, true)) {
+        $classFilter = $candidate;
+    }
+}
+
+try {
+    if ($type === 'guilds') {
+        $stmt = $pdo->prepare(
+            'SELECT name AS Name, leader_name AS LeaderName, money AS Money, amount AS Members
+             FROM guild
+             WHERE del_flag = 0
+             ORDER BY money DESC, amount DESC, name ASC
+             LIMIT :limit'
+        );
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+    } else {
+        $sql = 'SELECT c.Name, c.Profession, c.Level, c.CP, c.Experience
+                FROM characters c
+                INNER JOIN accounts a ON a.UID = c.UID
+                WHERE a.Permission = 1';
+
+        if ($classFilter !== null) {
+            $sql .= ' AND FLOOR(c.Profession / 10) = :classBase';
+        }
+
+        $sql .= ' ORDER BY c.Level DESC, c.Experience DESC, c.CP DESC
+                  LIMIT :limit';
+
+        $stmt = $pdo->prepare($sql);
+
+        if ($classFilter !== null) {
+            $stmt->bindValue(':classBase', $classFilter, PDO::PARAM_INT);
+        }
+
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+    }
+
+    echo json_encode([
+        'type' => $type,
+        'data' => $rows,
+    ]);
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Erro ao consultar ranking. Confira se a tabela characters existe e contém dados.']);
+    echo json_encode(['error' => 'Erro ao consultar ranking. Confira se as tabelas necessárias existem e contém dados.']);
 }

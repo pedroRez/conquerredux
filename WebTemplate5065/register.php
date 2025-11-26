@@ -86,18 +86,28 @@ if ($check->fetch()) {
 }
 
 // Registra o usuário na tabela já criada pelo servidor (Redux espera senha em texto puro; adeque se usar hashing).
-$insert = $pdo->prepare(
-    'INSERT INTO accounts (
-        Username, Password, EMail, EmailStatus, Question, Answer, Permission, Token, Timestamp
-    ) VALUES (
-        :username, :password, :email, 0, "", "", 1, 0, :timestamp
-    )'
-);
-$insert->execute([
-    ':username' => $username,
-    ':email' => $email,
-    ':password' => $password,
-    ':timestamp' => time(),
-]);
+// Permission = 1 mantém o jogador como "Player" (vide Enum/Permissions.cs); valores maiores são staff e devem ser ignorados no ranking.
+try {
+    $insert = $pdo->prepare(
+        'INSERT INTO accounts (
+            Username, Password, EMail, EmailStatus, Question, Answer, Permission, Token, Timestamp
+        ) VALUES (
+            :username, :password, :email, 0, "", "", 1, 0, :timestamp
+        )'
+    );
+    $insert->execute([
+        ':username' => $username,
+        ':email' => $email,
+        ':password' => $password,
+        ':timestamp' => time(),
+    ]);
 
-echo 'Cadastro realizado com sucesso. Agora você pode fazer login no servidor.';
+    if (!$insert->rowCount()) {
+        throw new PDOException('Nenhuma linha afetada na tabela accounts. Verifique permissões do usuário do banco.');
+    }
+
+    echo 'Cadastro realizado com sucesso. Agora você pode fazer login no servidor.';
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo 'Não foi possível salvar o registro no banco. Erro SQL: ' . $e->getMessage();
+}

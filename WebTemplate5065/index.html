@@ -98,6 +98,24 @@
             <button class="pill" data-limit="50">Top 50</button>
           </div>
         </div>
+        <div class="section-header" style="align-items: flex-start; gap: 1rem;">
+          <div class="pill-group" id="ranking-types">
+            <button class="pill active" data-type="characters">Jogadores</button>
+            <button class="pill" data-type="guilds">Guilds</button>
+          </div>
+          <label style="display:flex; flex-direction:column; gap:0.35rem; min-width: 220px;">
+            <span class="muted">Filtrar por classe</span>
+            <select id="class-filter">
+              <option value="">Todas</option>
+              <option value="1">Trojan</option>
+              <option value="2">Warrior</option>
+              <option value="4">Archer</option>
+              <option value="5">Ninja</option>
+              <option value="6">Monk</option>
+              <option value="9">Taoist</option>
+            </select>
+          </label>
+        </div>
         <div class="card table-card" id="character-card" style="display:none;">
           <div class="table-head">
             <span>Personagem</span>
@@ -110,7 +128,7 @@
           </div>
         </div>
 
-        <div class="card table-card">
+        <div class="card table-card" id="character-ranking">
           <div class="table-head">
             <span>#</span>
             <span>Jogador</span>
@@ -120,6 +138,19 @@
           </div>
           <div class="table-body" id="ranking-rows">
             <div class="row"><span>-</span><span>Carregando...</span><span>-</span><span>-</span><span>-</span></div>
+          </div>
+        </div>
+
+        <div class="card table-card" id="guild-ranking" style="display:none;">
+          <div class="table-head">
+            <span>#</span>
+            <span>Guild</span>
+            <span>Líder</span>
+            <span>Membros</span>
+            <span>Fundo</span>
+          </div>
+          <div class="table-body" id="guild-rows">
+            <div class="row"><span>-</span><span>Selecione a aba</span><span>-</span><span>-</span><span>-</span></div>
           </div>
         </div>
       </div>
@@ -202,11 +233,22 @@
     };
 
     const rankingBody = document.getElementById('ranking-rows');
+    const guildBody = document.getElementById('guild-rows');
     const filters = document.getElementById('ranking-filters');
+    const rankingTypes = document.getElementById('ranking-types');
+    const classFilter = document.getElementById('class-filter');
+    const characterRankingCard = document.getElementById('character-ranking');
+    const guildRankingCard = document.getElementById('guild-ranking');
     const loginForm = document.getElementById('login-form');
     const loginFeedback = document.getElementById('login-feedback');
     const characterCard = document.getElementById('character-card');
     const characterBody = document.getElementById('character-body');
+
+    const state = {
+      limit: 10,
+      type: 'characters',
+      class: '',
+    };
 
     const renderRanking = (rows) => {
       rankingBody.innerHTML = '';
@@ -229,18 +271,65 @@
       });
     };
 
-    const fetchRanking = (limit = 10) => {
-      fetch(`rank.php?limit=${limit}`)
+    const renderGuildRanking = (rows) => {
+      guildBody.innerHTML = '';
+      if (!rows.length) {
+        guildBody.innerHTML = '<div class="row"><span>-</span><span>Nenhuma guild encontrada</span><span>-</span><span>-</span><span>-</span></div>';
+        return;
+      }
+
+      rows.forEach((row, index) => {
+        const div = document.createElement('div');
+        div.className = 'row';
+        div.innerHTML = `
+          <span>${index + 1}</span>
+          <span>${row.Name}</span>
+          <span>${row.LeaderName}</span>
+          <span>${row.Members ?? 0}</span>
+          <span>${row.Money ?? 0}</span>
+        `;
+        guildBody.appendChild(div);
+      });
+    };
+
+    const toggleCards = () => {
+      if (state.type === 'guilds') {
+        characterRankingCard.style.display = 'none';
+        guildRankingCard.style.display = 'block';
+        classFilter.parentElement.style.visibility = 'hidden';
+      } else {
+        characterRankingCard.style.display = 'block';
+        guildRankingCard.style.display = 'none';
+        classFilter.parentElement.style.visibility = 'visible';
+      }
+    };
+
+    const fetchRanking = () => {
+      const params = new URLSearchParams({ limit: state.limit.toString(), type: state.type });
+      if (state.type === 'characters' && state.class) {
+        params.set('class', state.class);
+      }
+
+      const url = `rank.php?${params.toString()}`;
+
+      const bodyElement = state.type === 'guilds' ? guildBody : rankingBody;
+      bodyElement.innerHTML = '<div class="row"><span>-</span><span>Carregando...</span><span>-</span><span>-</span><span>-</span></div>';
+
+      fetch(url)
         .then((response) => response.json())
         .then((payload) => {
           if (payload && Array.isArray(payload.data)) {
-            renderRanking(payload.data);
+            if (payload.type === 'guilds') {
+              renderGuildRanking(payload.data);
+            } else {
+              renderRanking(payload.data);
+            }
           } else {
-            rankingBody.innerHTML = '<div class="row"><span>-</span><span>Não foi possível carregar o ranking</span><span>-</span><span>-</span><span>-</span></div>';
+            bodyElement.innerHTML = '<div class="row"><span>-</span><span>Não foi possível carregar o ranking</span><span>-</span><span>-</span><span>-</span></div>';
           }
         })
         .catch(() => {
-          rankingBody.innerHTML = '<div class="row"><span>-</span><span>Erro ao consultar rank.php</span><span>-</span><span>-</span><span>-</span></div>';
+          bodyElement.innerHTML = '<div class="row"><span>-</span><span>Erro ao consultar rank.php</span><span>-</span><span>-</span><span>-</span></div>';
         });
     };
 
@@ -317,10 +406,30 @@
       filters.querySelectorAll('.pill').forEach((pill) => pill.classList.remove('active'));
       button.classList.add('active');
 
-      const limit = parseInt(button.dataset.limit, 10) || 10;
-      fetchRanking(limit);
+      state.limit = parseInt(button.dataset.limit, 10) || 10;
+      fetchRanking();
     });
 
+    rankingTypes?.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-type]');
+      if (!button) return;
+
+      rankingTypes.querySelectorAll('.pill').forEach((pill) => pill.classList.remove('active'));
+      button.classList.add('active');
+
+      state.type = button.dataset.type;
+      toggleCards();
+      fetchRanking();
+    });
+
+    classFilter?.addEventListener('change', (event) => {
+      state.class = event.target.value;
+      if (state.type === 'characters') {
+        fetchRanking();
+      }
+    });
+
+    toggleCards();
     fetchRanking();
     fetchCharacter();
   </script>
