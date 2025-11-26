@@ -34,7 +34,7 @@
   <main>
     <section id="login" class="section alt">
       <div class="container split">
-        <div>
+        <div id="login-copy">
           <p class="eyebrow">Login</p>
           <h2>Entre com sua conta do jogo</h2>
           <p>Faça login com o mesmo usuário e senha do servidor para visualizar o personagem vinculado.</p>
@@ -43,6 +43,37 @@
             <li>Retorna o personagem relacionado ao UID da conta</li>
             <li>Sessão de login permanece ativa para consultas subsequentes</li>
           </ul>
+        </div>
+        <div id="character-summary" class="card" style="display:none;">
+          <div class="summary-header">
+            <div>
+              <p class="eyebrow">Personagem</p>
+              <p class="muted" id="summary-description">Resumo carregado após login.</p>
+            </div>
+            <span class="summary-badge" id="summary-rank">Rank -</span>
+          </div>
+          <div class="summary-grid">
+            <div>
+              <p class="muted">Nome</p>
+              <strong id="summary-name">-</strong>
+            </div>
+            <div>
+              <p class="muted">Classe</p>
+              <strong id="summary-class">-</strong>
+            </div>
+            <div>
+              <p class="muted">Nível</p>
+              <strong id="summary-level">-</strong>
+            </div>
+            <div>
+              <p class="muted">CP</p>
+              <strong id="summary-cp">-</strong>
+            </div>
+            <div>
+              <p class="muted">Dinheiro</p>
+              <strong id="summary-money">-</strong>
+            </div>
+          </div>
         </div>
         <div class="card-stack">
           <form id="login-form" class="card" method="post" action="login.php">
@@ -67,6 +98,26 @@
             <div class="session-row">
               <span>Usuário</span>
               <strong id="session-username">-</strong>
+            </div>
+            <div class="session-row">
+              <span>Personagem</span>
+              <strong id="session-character">-</strong>
+            </div>
+            <div class="session-row">
+              <span>Classe</span>
+              <strong id="session-class">-</strong>
+            </div>
+            <div class="session-row">
+              <span>Nível</span>
+              <strong id="session-level">-</strong>
+            </div>
+            <div class="session-row">
+              <span>Rank</span>
+              <strong id="session-rank">-</strong>
+            </div>
+            <div class="session-row">
+              <span>Dinheiro</span>
+              <strong id="session-money">-</strong>
             </div>
           </div>
         </div>
@@ -95,6 +146,10 @@
           <label>E-mail (máx. 64 caracteres)
             <input name="email" type="email" placeholder="seu@email.com" maxlength="64" required>
           </label>
+          <div class="captcha-wrapper">
+            <p class="muted">Proteção anti-bot gratuita com hCaptcha</p>
+            <div class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001" data-theme="dark"></div>
+          </div>
           <div class="sr-only">
             <label>Deixe este campo vazio (proteção contra bots)
               <input type="text" name="website" tabindex="-1" autocomplete="off">
@@ -138,18 +193,6 @@
             </select>
           </label>
         </div>
-        <div class="card table-card" id="character-card" style="display:none;">
-          <div class="table-head">
-            <span>Personagem</span>
-            <span>Classe</span>
-            <span>Nível</span>
-            <span>CP</span>
-          </div>
-          <div class="table-body" id="character-body">
-            <div class="row"><span>-</span><span>-</span><span>-</span><span>-</span></div>
-          </div>
-        </div>
-
         <div class="card table-card" id="character-ranking">
           <div class="table-head">
             <span>#</span>
@@ -232,7 +275,38 @@
     </div>
   </footer>
 
+  <div id="modal" class="modal" role="dialog" aria-modal="true" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">Aviso</h3>
+        <button id="modal-close" class="btn ghost" type="button">Fechar</button>
+      </div>
+      <p id="modal-message" class="muted"></p>
+    </div>
+  </div>
+
+  <div id="modal-backdrop" class="modal-backdrop" style="display:none;"></div>
+
   <script>
+    const openModal = (title, message) => {
+      const modal = document.getElementById('modal');
+      const modalBackdrop = document.getElementById('modal-backdrop');
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-message').textContent = message;
+      modal.style.display = 'block';
+      modalBackdrop.style.display = 'block';
+    };
+
+    const closeModal = () => {
+      const modal = document.getElementById('modal');
+      const modalBackdrop = document.getElementById('modal-backdrop');
+      modal.style.display = 'none';
+      modalBackdrop.style.display = 'none';
+    };
+
+    document.getElementById('modal-close')?.addEventListener('click', closeModal);
+    document.getElementById('modal-backdrop')?.addEventListener('click', closeModal);
+
     // Conecta os botões de valor rápido ao campo numérico
     document.querySelectorAll('.chip').forEach(button => {
       button.addEventListener('click', () => {
@@ -263,13 +337,25 @@
     const guildRankingCard = document.getElementById('guild-ranking');
     const loginForm = document.getElementById('login-form');
     const loginFeedback = document.getElementById('login-feedback');
-    const characterCard = document.getElementById('character-card');
-    const characterBody = document.getElementById('character-body');
     const sessionCard = document.getElementById('session-card');
     const sessionMessage = document.getElementById('session-message');
     const sessionUsername = document.getElementById('session-username');
+    const sessionCharacter = document.getElementById('session-character');
+    const sessionClass = document.getElementById('session-class');
+    const sessionLevel = document.getElementById('session-level');
+    const sessionRank = document.getElementById('session-rank');
+    const sessionMoney = document.getElementById('session-money');
     const logoutButton = document.getElementById('logout-button');
     const registerTimestamp = document.getElementById('register-form-ts');
+    const loginCopy = document.getElementById('login-copy');
+    const characterSummary = document.getElementById('character-summary');
+    const summaryName = document.getElementById('summary-name');
+    const summaryClass = document.getElementById('summary-class');
+    const summaryLevel = document.getElementById('summary-level');
+    const summaryCp = document.getElementById('summary-cp');
+    const summaryMoney = document.getElementById('summary-money');
+    const summaryRank = document.getElementById('summary-rank');
+    const summaryDescription = document.getElementById('summary-description');
 
     const state = {
       limit: 10,
@@ -364,32 +450,13 @@
         });
     };
 
-    const renderCharacter = (data) => {
-      if (!data || !data.Name) {
-        characterCard.style.display = 'none';
-        return;
-      }
-
-      characterCard.style.display = 'block';
-      characterBody.innerHTML = '';
-
-      const row = document.createElement('div');
-      row.className = 'row';
-      row.innerHTML = `
-        <span>${data.Name}</span>
-        <span>${professionName(parseInt(data.Profession, 10) || 0)}</span>
-        <span>${data.Level}</span>
-        <span>${data.CP ?? 0}</span>
-      `;
-      characterBody.appendChild(row);
-    };
-
     const showLoggedOutView = () => {
       loginForm.style.display = 'block';
       loginForm.reset();
       sessionCard.style.display = 'none';
       loginFeedback.textContent = '';
-      characterCard.style.display = 'none';
+      if (loginCopy) loginCopy.style.display = 'block';
+      if (characterSummary) characterSummary.style.display = 'none';
     };
 
     const showLoggedInView = (account, character, message) => {
@@ -397,7 +464,25 @@
       sessionCard.style.display = 'block';
       sessionMessage.textContent = message ?? 'Sessão ativa.';
       sessionUsername.textContent = account?.username ?? 'Jogador';
-      renderCharacter(character);
+      sessionCharacter.textContent = character?.Name ?? '-';
+      sessionClass.textContent = professionName(parseInt(character?.Profession, 10) || 0);
+      sessionLevel.textContent = character?.Level ?? '-';
+      sessionRank.textContent = character?.Rank ? `#${character.Rank}` : '-';
+      sessionMoney.textContent = character?.Money ?? '-';
+
+      if (loginCopy) loginCopy.style.display = 'none';
+      if (characterSummary) {
+        characterSummary.style.display = 'block';
+        summaryName.textContent = character?.Name ?? '-';
+        summaryClass.textContent = professionName(parseInt(character?.Profession, 10) || 0);
+        summaryLevel.textContent = character?.Level ?? '-';
+        summaryCp.textContent = character?.CP ?? '-';
+        summaryMoney.textContent = character?.Money ?? '-';
+        summaryRank.textContent = character?.Rank ? `Top ${character.Rank}` : 'Rank -';
+        summaryDescription.textContent = character?.Name
+          ? `${character.Name} está no nível ${character.Level} e marcou ${character.CP ?? 0} CP.`
+          : 'Resumo carregado após login.';
+      }
     };
 
     const fetchCharacter = () => {
@@ -437,15 +522,16 @@
         .then((data) => {
           if (data.error) {
             loginFeedback.textContent = data.error;
-            characterCard.style.display = 'none';
+            openModal('Erro no login', data.error);
             return;
           }
 
           showLoggedInView(data.account, data.character, data.message ?? 'Login realizado.');
+          openModal('Login realizado', data.message ?? 'Sessão iniciada com sucesso.');
         })
         .catch(() => {
           loginFeedback.textContent = 'Não foi possível concluir o login agora.';
-          characterCard.style.display = 'none';
+          openModal('Erro', 'Não foi possível concluir o login agora.');
         });
     });
 
@@ -455,9 +541,44 @@
         .then((payload) => {
           showLoggedOutView();
           loginFeedback.textContent = payload?.message ?? 'Sessão encerrada.';
+          openModal('Sessão encerrada', payload?.message ?? 'Sessão encerrada.');
         })
         .catch(() => {
           sessionMessage.textContent = 'Não foi possível encerrar a sessão agora.';
+          openModal('Erro', 'Não foi possível encerrar a sessão agora.');
+        });
+    });
+
+    const registerForm = document.getElementById('register-form');
+
+    registerForm?.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(registerForm);
+      const payload = new URLSearchParams();
+      formData.forEach((value, key) => payload.append(key, value.toString()));
+
+      fetch('register.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: payload.toString(),
+      })
+        .then(async (response) => {
+          const data = await response.json().catch(() => ({ error: 'Resposta inesperada do servidor.' }));
+          if (!response.ok || data.error) {
+            const message = data.error || 'Não foi possível concluir o cadastro.';
+            openModal('Erro no cadastro', message);
+            return;
+          }
+
+          openModal('Cadastro concluído', data.message || 'Cadastro realizado com sucesso.');
+          registerForm.reset();
+          if (window.hcaptcha?.reset) {
+            window.hcaptcha.reset();
+          }
+        })
+        .catch(() => {
+          openModal('Erro', 'Não foi possível concluir o cadastro agora.');
         });
     });
 
@@ -495,5 +616,6 @@
     fetchRanking();
     fetchCharacter();
   </script>
+  <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 </body>
 </html>

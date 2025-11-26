@@ -36,10 +36,27 @@ try {
 }
 
 $characterStmt = $pdo->prepare(
-    'SELECT Name, Profession, Level, CP FROM characters WHERE UID = :uid ORDER BY Level DESC, Experience DESC LIMIT 1'
+    'SELECT Name, Profession, Level, CP, Money, Experience FROM characters WHERE UID = :uid ORDER BY Level DESC, Experience DESC LIMIT 1'
 );
 $characterStmt->execute([':uid' => $_SESSION['account_uid']]);
 $character = $characterStmt->fetch();
+
+if ($character) {
+    $rankStmt = $pdo->prepare(
+        'SELECT COUNT(*) + 1 FROM characters c2
+         WHERE (c2.Level > :level)
+            OR (c2.Level = :level AND c2.Experience > :experience)
+            OR (c2.Level = :level AND c2.Experience = :experience AND COALESCE(c2.CP, 0) > COALESCE(:cp, 0))'
+    );
+
+    $rankStmt->execute([
+        ':level' => $character['Level'],
+        ':experience' => $character['Experience'],
+        ':cp' => $character['CP'],
+    ]);
+
+    $character['Rank'] = (int) $rankStmt->fetchColumn();
+}
 
 if (!$character) {
     echo json_encode([
