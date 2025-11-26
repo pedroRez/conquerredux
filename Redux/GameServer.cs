@@ -145,6 +145,9 @@ namespace Redux.Game_Server
         #region MsgTalkPacket
         public static void Process_TalkPacket(Player client, TalkPacket packet)
         {
+            if (string.IsNullOrWhiteSpace(packet.Words))
+                return;
+
             if (packet.Words[0] == Constants.COMMAND_PREFIX)
             {
                 Commands.Handle(client, packet.Words.Substring(1).ToLower().Split(' '));
