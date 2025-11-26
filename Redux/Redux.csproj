@@ -341,7 +341,6 @@
     <Compile Include="Npcs\Twin City\[5030] Tinter.cs" />
     <Compile Include="Npcs\Twin City\[10063] ShopBoy.cs" />
     <Compile Include="Npcs\Twin City\[20005] Celestine.cs" />
-    <Compile Include="Npcs\Twin City\[1337] Welcomer NPC.cs" />
     <Compile Include="Npcs\Twin City\[10002] Barber.cs" />
     <Compile Include="Npcs\Twin City\[10003] GuildDirector.cs" />
     <Compile Include="Npcs\Twin City\[101617] Boxer.cs" />
