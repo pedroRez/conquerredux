@@ -6,10 +6,35 @@ namespace Redux
         public const int EXP_BALL_LIMIT = 10;
         public const uint EMERALD_ID = 1080001, DB_SCROLL_ID = 720028, DRAGONBALL_ID = 1088000, METEOR_SCROLL_ID = 720027, METEOR_ID = 1088001, METEOR_TEAR_ID = 1088002, MOONBOX_ID = 721020, CELESTIAL_STONE_ID = 721259;
         public const bool IsSameSexMarriageAllowed = true;
-        public const int EXP_RATE = 3,
+        public const int EXP_RATE = 8,
                               PROF_RATE = 5,
                               SKILL_RATE = 5,
                               GOLD_RATE = 5;
+
+        /// <summary>
+        /// Level-based EXP multipliers for the requested curve:
+        /// 1-40: 20x, 40-100: 12x, 100-110: 8x, 110-130: 20x. Ranges are inclusive and evaluated in order
+        /// (so level 40 stays at 20x and level 100 uses 8x as requested).
+        /// Adjust the ranges or values here to tune progression without touching the rest of the code.
+        /// </summary>
+        public static readonly IReadOnlyList<LevelExpRateRange> LevelExpRateBands = new List<LevelExpRateRange>
+        {
+            new LevelExpRateRange(110, 130, 20),
+            new LevelExpRateRange(100, 110, 8),
+            new LevelExpRateRange(1, 40, 20),
+            new LevelExpRateRange(40, 100, 12)
+        };
+
+        public static int GetExpRateForLevel(int level)
+        {
+            foreach (var band in LevelExpRateBands)
+            {
+                if (band.Contains(level))
+                    return band.Rate;
+            }
+
+            return EXP_RATE;
+        }
 
         // Multiplier applied to monster spawn counts when maps are initialized.
         public const double MONSTER_SPAWN_MULTIPLIER = 1.5;
@@ -128,5 +153,24 @@ namespace Redux
 
 
         public static readonly string[] GemEffectsByID = new string[] { "phoenix", "goldendragon", "lounder1", "rainbow", "goldenkylin", "purpleray", "moon", "recovery", };
+    }
+
+    public readonly struct LevelExpRateRange
+    {
+        public int MinLevel { get; }
+        public int MaxLevel { get; }
+        public int Rate { get; }
+
+        public LevelExpRateRange(int minLevel, int maxLevel, int rate)
+        {
+            MinLevel = minLevel;
+            MaxLevel = maxLevel;
+            Rate = rate;
+        }
+
+        public bool Contains(int level)
+        {
+            return level >= MinLevel && level <= MaxLevel;
+        }
     }
 }
