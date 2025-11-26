@@ -26,6 +26,11 @@ namespace Redux.Managers
             return Repository.IncrementMiniObjectiveTickets(entryId, amount);
         }
 
+        public static EventEntry FindEntry(uint entryId)
+        {
+            return Repository.GetEntry(entryId);
+        }
+
         public static IList<EventEntry> ListEntries(uint configId)
         {
             return Repository.ListEntries(configId);

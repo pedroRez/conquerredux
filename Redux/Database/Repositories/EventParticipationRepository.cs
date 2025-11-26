@@ -96,6 +96,14 @@ namespace Redux.Database.Repositories
             }
         }
 
+        public EventEntry GetEntry(uint entryId)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+            {
+                return session.Get<EventEntry>(entryId);
+            }
+        }
+
         public IList<EventEntry> ListEntries(uint configId)
         {
             using (var session = NHibernateHelper.OpenSession())

@@ -10,6 +10,7 @@ using Redux.Space;
 using Redux.Cryptography;
 using Redux.Network;
 using Redux.Managers;
+using Redux.Events;
 using Redux.Enum;
 using Redux.Packets.Game;
 using Redux.Structures;
@@ -34,6 +35,7 @@ namespace Redux.Game_Server
         public AssociateManager AssociateManager;
         public WarehouseManager WarehouseManager;
         public TeamManager Team;
+        public EventNormalizationState EventNormalization { get; private set; } = new EventNormalizationState();
 
         public Structures.GuildAttr GuildAttribute { get; set; }
         public uint GuildId { get { return GuildAttribute.GuildId; } }
@@ -653,6 +655,8 @@ namespace Redux.Game_Server
                 if (Equipment.TryGetItemBySlot(loc, out item))
                     CombatStats.AddItemStats(item);
 
+            EventNormalizationManager.ApplyCombatOverrides(this);
+
             SendMessage(string.Format("Damage {0}-{1} Defense {2} Magic Resistance {3} Magic Defense {4} Maximum Health {5} Maximum Mana {6}", CombatStats.MinimumDamage, CombatStats.MaximumDamage,
                 CombatStats.Defense, CombatStats.MagicResistance, CombatStats.MagicDamage, CombatStats.MaxLife, CombatStats.MaxMana));
 
@@ -839,6 +843,12 @@ namespace Redux.Game_Server
         #region Equip Item
         public void HandleItemEquipPacket(ItemActionPacket packet)
         {
+            if (EventNormalization.IsActive)
+            {
+                SendSysMessage("Equipamentos pessoais estão bloqueados neste evento.");
+                return;
+            }
+
             if (!Inventory.ContainsKey(packet.UID))
                 return;
             var item = Inventory[packet.UID];
@@ -1229,6 +1239,7 @@ namespace Redux.Game_Server
 
             //Save current map location if needed
             var newMap = ServerDatabase.Context.Maps.GetById(_id);
+            uint? previousMapId = Map != null ? (uint?)Map.ID : null;
 
             //Update online training as required
             if (newMap.ID == 601 || newMap.ID == 1039)
@@ -1258,6 +1269,7 @@ namespace Redux.Game_Server
                 Data2High = Y,
                 Action = DataAction.Teleport,
             });
+            EventNormalizationManager.OnMapChanged(this, previousMapId, _id);
             MapManager.AddPlayer(this, _id);
             AddStatus(Enum.ClientStatus.ReviveProtection, 0, 5 * Common.MS_PER_SECOND);
             Send(MapStatusPacket.Create(Map.MapInfo));

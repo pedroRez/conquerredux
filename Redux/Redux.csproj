@@ -433,6 +433,8 @@
     <Compile Include="Structures\ConquerItem.cs" />
     <Compile Include="Structures\ConquerProficiency.cs" />
     <Compile Include="Structures\ConquerSkill.cs" />
+    <Compile Include="Events\EventNormalizationManager.cs" />
+    <Compile Include="Events\EventParticipationHandlers.cs" />
     <Compile Include="Objects\GroundItem.cs" />
     <Compile Include="Structures\GuildAttr.cs" />
     <Compile Include="Structures\Guild.cs" />
