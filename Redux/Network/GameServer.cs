@@ -595,6 +595,8 @@ namespace Redux.Game_Server
                         }
                         if (client.Character.DoubleExpExpires > DateTime.Now)
                             client.Send(UpdatePacket.Create(client.UID, UpdateType.DoubleExpTime, Common.SecondsFromNow(client.Character.DoubleExpExpires)));
+                        var hiddenButtons = InterfaceHideFlag.Mentor | InterfaceHideFlag.ItemLock;
+                        client.Send(GeneralActionPacket.Create(client.UID, (uint)hiddenButtons, 0, 0, DataAction.HideInterface));
                         client.Send(packet);
                         break;
                     }
