@@ -50,6 +50,18 @@ namespace Redux.Database.Repositories
             }
         }
 
+        public IList<EventConfig> ListActiveConfigs(DateTime referenceTime)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+            {
+                return session
+                    .QueryOver<EventConfig>()
+                    .Where(config => config.Status == "ACTIVE" && config.StartsAt <= referenceTime && config.EndsAt >= referenceTime)
+                    .OrderBy(config => config.StartsAt).Asc
+                    .List();
+            }
+        }
+
         public EventEntry RegisterEntry(uint configId, uint characterId, string entryType, ushort maxTicketsPerPlayer)
         {
             using (var session = NHibernateHelper.OpenSession())
@@ -167,6 +179,18 @@ namespace Redux.Database.Repositories
             }
         }
 
+        public EventEntry GetEntryForPlayer(uint configId, uint characterId)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+            {
+                return session
+                    .QueryOver<EventEntry>()
+                    .Where(entry => entry.EventConfigId == configId && entry.CharacterId == characterId)
+                    .Take(1)
+                    .SingleOrDefault();
+            }
+        }
+
         public IList<EventEntry> ListEntries(uint configId)
         {
             using (var session = NHibernateHelper.OpenSession())
@@ -221,6 +245,32 @@ namespace Redux.Database.Repositories
                     .WhereRestrictionOn(reward => reward.EventEntryId)
                     .IsIn(entryIds.ToArray())
                     .List();
+            }
+        }
+
+        public IList<EventReward> ListRewardsByCharacter(uint characterId, int limit = 20)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+            {
+                var entryIds = session
+                    .QueryOver<EventEntry>()
+                    .Where(entry => entry.CharacterId == characterId)
+                    .Select(entry => entry.Id)
+                    .List<uint>();
+
+                if (entryIds.Count == 0)
+                    return new List<EventReward>();
+
+                var query = session
+                    .QueryOver<EventReward>()
+                    .WhereRestrictionOn(reward => reward.EventEntryId)
+                    .IsIn(entryIds.ToArray())
+                    .OrderBy(reward => reward.GrantedAt).Desc();
+
+                if (limit > 0)
+                    query = query.Take(limit);
+
+                return query.List();
             }
         }
 

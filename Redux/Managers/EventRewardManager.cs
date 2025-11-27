@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Redux;
+using Redux.Database;
 using Redux.Database.Models;
+using Redux.Enum;
 using Redux.Game_Server;
+using Redux.Packets.Game;
 
 namespace Redux.Managers
 {
@@ -43,6 +46,8 @@ namespace Redux.Managers
             winnersCount = Math.Min(winnersCount, eligibleEntries.Count);
 
             var winners = DrawWinners(eligibleEntries, winnersCount);
+            var winnerRewards = new List<Tuple<EventEntry, EventReward>>();
+
             foreach (var winner in winners)
             {
                 var reward = new EventReward
@@ -54,10 +59,14 @@ namespace Redux.Managers
                     Delivered = false
                 };
 
-                EventManager.SaveRewards(winner.Id, new[] { reward });
-                LogWinner(config, winner, reward);
+                var savedRewards = EventManager.SaveRewards(winner.Id, new[] { reward });
+                var persistedReward = savedRewards?.FirstOrDefault() ?? reward;
+
+                winnerRewards.Add(new Tuple<EventEntry, EventReward>(winner, persistedReward));
+                LogWinner(config, winner, persistedReward);
             }
 
+            AnnounceWinners(config, winnerRewards);
             EventManager.MarkConfigInactive(config.Id);
         }
 
@@ -162,6 +171,66 @@ namespace Redux.Managers
         {
             Console.WriteLine(
                 $"[EVENT-DELIVERY] Character {player.UID} received reward {reward.RewardType}:{reward.RewardValue} at {DateTime.UtcNow:u}");
+        }
+
+        public static string GetRewardSummary(EventConfig config)
+        {
+            if (config == null)
+                return "recompensa desconhecida";
+
+            var rewardType = (config.RewardType ?? "ITEM").ToUpperInvariant();
+            switch (rewardType)
+            {
+                case "CURRENCY":
+                    return $"{config.RewardValue} CP";
+                case "EXPERIENCE":
+                    return $"{config.RewardValue} EXP";
+                default:
+                    return $"item #{config.RewardValue}";
+            }
+        }
+
+        public static string GetRewardSummary(EventReward reward)
+        {
+            if (reward == null)
+                return "recompensa";
+
+            var rewardType = (reward.RewardType ?? "ITEM").ToUpperInvariant();
+            switch (rewardType)
+            {
+                case "CURRENCY":
+                    return $"{reward.RewardValue} CP";
+                case "EXPERIENCE":
+                    return $"{reward.RewardValue} EXP";
+                default:
+                    return $"item #{reward.RewardValue}";
+            }
+        }
+
+        private static void AnnounceWinners(EventConfig config, IList<Tuple<EventEntry, EventReward>> winners)
+        {
+            if (config == null || winners == null || winners.Count == 0)
+                return;
+
+            var summaries = new List<string>();
+            foreach (var tuple in winners)
+            {
+                var entry = tuple?.Item1;
+                var reward = tuple?.Item2;
+                if (entry == null)
+                    continue;
+
+                var character = ServerDatabase.Context.Characters.GetByUID(entry.CharacterId);
+                var name = character?.Name ?? $"#{entry.CharacterId}";
+                var rewardText = GetRewardSummary(reward) ?? GetRewardSummary(config);
+                summaries.Add($"{name} ({rewardText})");
+            }
+
+            if (summaries.Count == 0)
+                return;
+
+            var message = $"[Evento] '{config.Title}' finalizado! Vencedores: {string.Join(", ", summaries)}.";
+            PlayerManager.SendToServer(new TalkPacket(ChatType.Broadcast, message));
         }
     }
 }
