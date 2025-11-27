@@ -163,6 +163,7 @@ namespace Redux.Game_Server
 
         private void GenerateDrops(uint _killer)
         {
+            var killerPlayer = Map.Search<Player>(_killer);
             #region Drop Rules
             var dropCount = 0;
             foreach (var rule in Owner.DropRules)
@@ -174,37 +175,34 @@ namespace Redux.Game_Server
                     {
                         case DropRuleType.GroundItem:
                             {
-                                DropItemByID(rule.RuleValue, _killer);
+                                DropItemByID(rule.RuleValue, _killer, _killerPlayer: killerPlayer);
                                 break;
                             }
                         case DropRuleType.InventoryCP:
                             {
-                                var killer = Map.Search<Player>(_killer);
-                                if (killer != null)
+                                if (killerPlayer != null)
                                 {
-                                    killer.CP += rule.RuleValue;
-                                    killer.SendMessage("You've received a bonus " + rule.RuleValue + " cp for killing a(n) " + BaseMonster.Name + "!", ChatType.System);
+                                    killerPlayer.CP += rule.RuleValue;
+                                    killerPlayer.SendMessage("You've received a bonus " + rule.RuleValue + " cp for killing a(n) " + BaseMonster.Name + "!", ChatType.System);
                                 }
                                 break;
                             }
                         case DropRuleType.InventoryGold:
                             {
-                                var killer = Map.Search<Player>(_killer);
-                                if (killer != null)
+                                if (killerPlayer != null)
                                 {
-                                    killer.Money += rule.RuleValue;
-                                    killer.SendMessage("You've received a bonus " + rule.RuleValue + " silver for killing a(n) " + BaseMonster.Name + "!", ChatType.System);
+                                    killerPlayer.Money += rule.RuleValue;
+                                    killerPlayer.SendMessage("You've received a bonus " + rule.RuleValue + " silver for killing a(n) " + BaseMonster.Name + "!", ChatType.System);
                                 }
                                 break;
                             }
                         case DropRuleType.InventoryItem:
                             {
-                                var killer = Map.Search<Player>(_killer);
-                                if (killer != null)
+                                if (killerPlayer != null)
                                 {
-                                    var item = killer.CreateItem(rule.RuleValue);
+                                    var item = killerPlayer.CreateItem(rule.RuleValue);
                                     if (item != null && item.BaseItem != null)
-                                        killer.SendMessage("You've received a " + item.BaseItem.Name + " for killing a(n) " + BaseMonster.Name + "!", ChatType.System);
+                                        killerPlayer.SendMessage("You've received a " + item.BaseItem.Name + " for killing a(n) " + BaseMonster.Name + "!", ChatType.System);
                                 }
                                 break;
                             }
@@ -214,16 +212,20 @@ namespace Redux.Game_Server
             #endregion
 
             #region Drop Rares
-            if (Common.PercentSuccess(Constants.CHANCE_METEOR))
-                DropItemByID(Constants.METEOR_ID, _killer);
+            var meteorChance = Constants.CHANCE_METEOR;
+            if (killerPlayer != null && killerPlayer.Level > Constants.METEOR_REDUCED_DROP_LEVEL)
+                meteorChance = Constants.CHANCE_METEOR_HIGH_LEVEL;
+
+            if (Common.PercentSuccess(meteorChance))
+                DropItemByID(Constants.METEOR_ID, _killer, _killerPlayer: killerPlayer);
 
             if (Common.PercentSuccess(Constants.CHANCE_DRAGONBALL))
-                DropItemByID(Constants.DRAGONBALL_ID, _killer);
+                DropItemByID(Constants.DRAGONBALL_ID, _killer, _killerPlayer: killerPlayer);
             #endregion
 
             #region Drop Gear
             while (Common.PercentSuccess(Constants.CHANCE_GEAR_DROP) && dropCount < 4)
-                DropItemByID(DropManager.GenerateDropID(BaseMonster.Level), _killer);
+                DropItemByID(DropManager.GenerateDropID(BaseMonster.Level), _killer, _killerPlayer: killerPlayer);
             #endregion
 
             #region Drop Money
@@ -241,7 +243,7 @@ namespace Redux.Game_Server
                     itemID = 1090020;
                 else if (value > 50)
                     itemID = 1090010;
-                DropItemByID(itemID, _killer, CurrencyType.Silver, value);
+                DropItemByID(itemID, _killer, CurrencyType.Silver, value, killerPlayer);
                 dropCount++;
             }
             while (Common.PercentSuccess(Constants.CHANCE_POTION) && dropCount < 4)
@@ -249,15 +251,16 @@ namespace Redux.Game_Server
                 var itemID = BaseMonster.DropHP;
                 if (Common.Random.Next(100) > 60)
                     itemID = BaseMonster.DropMP;
-                DropItemByID(itemID, _killer);
+                DropItemByID(itemID, _killer, _killerPlayer: killerPlayer);
                 dropCount++;
             }
             #endregion
         }
 
-        private void DropItemByID(uint _id, uint _killer, CurrencyType _currency = CurrencyType.None, uint _value = 0)
+        private void DropItemByID(uint _id, uint _killer, CurrencyType _currency = CurrencyType.None, uint _value = 0, Player _killerPlayer = null)
         {
             var itemInfo = Database.ServerDatabase.Context.ItemInformation.GetById(_id);
+            var killerPlayer = _killerPlayer ?? Map.Search<Player>(_killer);
             if (itemInfo != null)
             {
                 var loc = GetValidLocation();
@@ -274,7 +277,32 @@ namespace Redux.Game_Server
                         coItem.Plus = 1;
                     var groundItem = new GroundItem(coItem, coItem.UniqueID, loc, Map, _killer, _currency, _value);
                     groundItem.AddToMap();
+                    NotifyKillerOfRareDrop(killerPlayer, coItem);
                 }
+            }
+        }
+
+        private void NotifyKillerOfRareDrop(Player killerPlayer, Structures.ConquerItem item)
+        {
+            if (killerPlayer == null || item == null)
+                return;
+
+            if (item.StaticID == Constants.METEOR_ID)
+            {
+                killerPlayer.SendMessage("A meteor dropped nearby!", ChatType.System);
+                return;
+            }
+
+            if (item.StaticID == Constants.DRAGONBALL_ID)
+            {
+                killerPlayer.SendMessage("A dragonball dropped nearby!", ChatType.System);
+                return;
+            }
+
+            if (item.IsEquipment && item.EquipmentQuality >= DropManager.QUALITY_ELITE)
+            {
+                var label = item.EquipmentQuality >= DropManager.QUALITY_SUPER ? "Super" : "Elite";
+                killerPlayer.SendMessage(label + " item dropped: " + item.GetDisplayNameWithQuality(), ChatType.System);
             }
         }
         public Point GetValidLocation()

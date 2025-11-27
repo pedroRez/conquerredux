@@ -829,6 +829,9 @@ namespace Redux.Game_Server
                     WarehouseManager.LoadItem(coItem);
             }
             
+            if (CombatManager == null)
+                CombatManager = new CombatManager(this);
+
             SpawnPacket = SpawnEntityPacket.Create(this);
 
             if (Character.OfflineTGEntered != DateTime.MinValue)
@@ -1056,7 +1059,7 @@ namespace Redux.Game_Server
                 return;
             if(CombatManager == null)
             {
-                Console.WriteLine("ERROR: " + Name + " has a null combat manager. Re-creating");
+                Console.WriteLine("Combat manager missing for {0}. Re-creating instance.", Name);
                 CombatManager = new CombatManager(this);
             }
             if (!Constants.DEBUG_MODE && Common.Clock - LastPingReceived > Common.MS_PER_SECOND * 45)

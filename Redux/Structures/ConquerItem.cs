@@ -88,13 +88,13 @@ namespace Redux.Structures
             switch (EquipmentQuality)
             {
                 case 6:
-                    return "[R]";
+                    return "R";
                 case 7:
-                    return "[U]";
+                    return "U";
                 case 8:
-                    return "[E]";
+                    return "E";
                 case 9:
-                    return "[S]";
+                    return "S";
                 default:
                     return string.Empty;
             }
@@ -102,8 +102,17 @@ namespace Redux.Structures
 
         public string GetDisplayNameWithQuality()
         {
+            var tags = new List<string>();
             var prefix = GetQualityPrefix();
-            return string.IsNullOrEmpty(prefix) ? BaseItem.Name : string.Format("{0} {1}", prefix, BaseItem.Name);
+            if (!string.IsNullOrEmpty(prefix))
+                tags.Add(prefix);
+            if (Plus > 0)
+                tags.Add("+" + Plus);
+
+            if (tags.Count == 0)
+                return BaseItem.Name;
+
+            return "[" + string.Join(string.Empty, tags) + "]" + BaseItem.Name;
         }
         public void ChangeItemID(uint _id)
         {

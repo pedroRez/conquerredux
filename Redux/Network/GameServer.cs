@@ -164,7 +164,20 @@ namespace Redux.Game_Server
                 case Constants.MSG_OFFLINETG: Process_OfflineTG(client, ptr); break;
                 case Constants.MSG_BROADCAST: Process_Broadcast(client, ptr); break;
 
-                default: Console.WriteLine("Unknown packet type {0} from {1} ", type, client.Name == null ? "NO NAME" : client.Name); break;
+                default:
+                    if (safePacket != null && (type == 2866 || type == 2867))
+                    {
+                        try
+                        {
+                            Directory.CreateDirectory("logs");
+                            var fileName = string.Format("logs/unknown-{0}-{1:yyyyMMddHHmmssfff}.txt", type, DateTime.UtcNow);
+                            var header = string.Format("Captured packet {0} from {1}", type, client.Name ?? "NO NAME");
+                            File.WriteAllText(fileName, header + Environment.NewLine + BitConverter.ToString(safePacket));
+                        }
+                        catch { }
+                    }
+                    Console.WriteLine("Unknown packet type {0} from {1} ", type, client.Name == null ? "NO NAME" : client.Name);
+                    break;
             }
         }
         #endregion
@@ -421,7 +434,8 @@ namespace Redux.Game_Server
                 #endregion
                 #region LoadSkills
                 case DataAction.ConfirmSkills:
-                    client.CombatManager = new CombatManager(client);
+                    if (client.CombatManager == null)
+                        client.CombatManager = new CombatManager(client);
                     client.Send(packet);
                     break;
                 #endregion
