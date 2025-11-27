@@ -251,6 +251,18 @@ namespace Redux.Game_Server
             set { xp = value; }
         }
 
+        public void GainXpProgress(byte amount)
+        {
+            if (HasEffect(ClientEffect.XpStart) || amount == 0)
+                return;
+
+            Xp = (byte)Math.Min(100, Xp + amount);
+            if (xp == 100 && CombatManager.HasXPSkills)
+                AddEffect(ClientEffect.XpStart, 20000);
+
+            LastXpUp = Common.Clock;
+        }
+
         public override int AttackRange
         {
             get
@@ -1058,13 +1070,8 @@ namespace Redux.Game_Server
                         toGain = 11;
                     Stamina = (byte)Math.Min((Character.HeavenBlessExpires > DateTime.Now) ? 150 : 100, stamina + toGain);
                 }
-                if (!HasEffect(ClientEffect.XpStart) && Common.Clock - LastXpUp > Common.MS_PER_SECOND * 3)
-                {
-                    Xp = (byte)(Math.Min(100, Xp + 1));
-                    if (xp == 100 && CombatManager.HasXPSkills)
-                        AddEffect(ClientEffect.XpStart, 20000);
-                    LastXpUp = Common.Clock;
-                }
+                if (Common.Clock - LastXpUp > Common.MS_PER_SECOND * 3)
+                    GainXpProgress(1);
                 if (PK > 0 && Common.Clock - LastPkPoint > Common.MS_PER_MINUTE * 6)//If last Pk point has been 6 minutes
                 {
                     PK -= 1;//Minus 1 PK point
