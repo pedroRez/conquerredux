@@ -15,13 +15,13 @@ namespace Redux.Npcs
     /// <summary>
     /// Handles NPC usage for [126] Assistant
     /// </summary>
-    public class NPC_127 : INpc
+    public class NPC_126 : INpc
     {
 
-        public NPC_127(Game_Server.Player _client)
+        public NPC_126(Game_Server.Player _client)
             :base (_client)
     	{
-            ID = 127;	
+            ID = 126;	
 			Face = 9;    
     	}
 

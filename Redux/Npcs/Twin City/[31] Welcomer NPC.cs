@@ -25,8 +25,9 @@ namespace Redux.Npcs
         	switch(_linkback)
         	{
                 case 0:
-                    AddText("Welcome to Triumph CO! Please enjoy your stay");
-                    AddOption("Thanks", 255);
+                    AddText("Bem-vindo ao servidor Redux! Aqui e 100% No Pay to Win e No Pay to Power,");
+                    AddText("todo o progresso vem jogando. Aproveite a jornada e divirta-se.");
+                    AddOption("Entendi, obrigado!", 255);
                     break;
         		default:
         			break;

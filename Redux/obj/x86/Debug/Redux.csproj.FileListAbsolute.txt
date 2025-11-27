@@ -256,3 +256,5 @@ C:\Users\Theo\Desktop\Theo\Redux 3.05\Redux\obj\x86\Debug\Redux.csproj.CoreCompi
 C:\Users\Theo\Desktop\Theo\Redux 3.05\Redux\obj\x86\Debug\Redux.csproj.Up2Date
 C:\Users\Theo\Desktop\Theo\Redux 3.05\Redux\obj\x86\Debug\Redux.exe
 C:\Users\Theo\Desktop\Theo\Redux 3.05\Redux\obj\x86\Debug\Redux.pdb
+C:\Users\User\Documents\Projetos\conquerredux\Redux\obj\x86\Debug\Redux.exe
+C:\Users\User\Documents\Projetos\conquerredux\Redux\obj\x86\Debug\Redux.pdb

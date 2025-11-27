@@ -280,16 +280,19 @@
     <Compile Include="Network\NetworkClient.cs" />
     <Compile Include="Network\NetworkClientEvents.cs" />
     <Compile Include="Network\NetworkServer.cs" />
+    <Compile Include="Npcs\Ape Mountain\[10028] Warehouse.cs" />
     <Compile Include="Npcs\Ape Mountain\[101623] Boxer.cs" />
     <Compile Include="Npcs\Ape Mountain\[126] Assistant.cs" />
     <Compile Include="Npcs\Ape Mountain\[47] Warehouse.cs" />
     <Compile Include="Npcs\Ape Mountain\[10053] Conductress.cs" />
     <Compile Include="Npcs\Ape Mountain\[102097] Guild Conductress 3.cs" />
+    <Compile Include="Npcs\Bird Island\[10027] Warehouse.cs" />
     <Compile Include="Npcs\Bird Island\[101625] Boxer.cs" />
     <Compile Include="Npcs\Bird Island\[45] Warehouse.cs" />
     <Compile Include="Npcs\Bird Island\[10056] Conductress.cs" />
     <Compile Include="Npcs\Bird Island\[102093] Guild Conductress 1.cs" />
     <Compile Include="Npcs\Bird Island\[50021] Minner.cs" />
+    <Compile Include="Npcs\Desert City\[10011] Warehouse.cs" />
     <Compile Include="Npcs\Desert City\[101619] Boxer.cs" />
     <Compile Include="Npcs\Desert City\[126] Assistant.cs" />
     <Compile Include="Npcs\Desert City\[46] Warehouse.cs" />
@@ -304,9 +307,9 @@
     <Compile Include="Npcs\Guild Map\[101615] Guild Conductress 2.cs" />
     <Compile Include="Npcs\Guild Map\[101617] Guild Conductress 1.cs" />
     <Compile Include="Npcs\Guild Map\[7000] GuildGateKeeper.cs" />
-    <Compile Include="Npcs\Lab\[1341] Old Explorer %28Level 3%29.cs" />
-    <Compile Include="Npcs\Lab\[1340] Old Explorer %28Level 2%29.cs" />
-    <Compile Include="Npcs\Lab\[1339] Old Explorer %28Level 1%29.cs" />
+    <Compile Include="Npcs\Lab\[1341] Old Explorer (Level 3).cs" />
+    <Compile Include="Npcs\Lab\[1340] Old Explorer (Level 2).cs" />
+    <Compile Include="Npcs\Lab\[1339] Old Explorer (Level 1).cs" />
     <Compile Include="Npcs\Lab\[1152] Simon.cs" />
     <Compile Include="Npcs\Market\[300000] Shelby.cs" />
     <Compile Include="Npcs\Market\[3381] SurgeonMiracle.cs" />
@@ -324,6 +327,7 @@
     <Compile Include="Npcs\Market\[2071] CPAdmin.cs" />
     <Compile Include="Npcs\Market\[5004] MillionareLee.cs" />
     <Compile Include="Npcs\Market\[923] LadyLuck.cs" />
+    <Compile Include="Npcs\Market\[45] Market Controller.cs" />
     <Compile Include="Npcs\Market\[4450] Market Controller.cs" />
     <Compile Include="Npcs\Market\[44] Warehouse.cs" />
     <Compile Include="Npcs\Market\[7050] Equipment Master.cs" />
@@ -340,6 +344,7 @@
     <Compile Include="Npcs\Promotion Centre\[400] Archer God.cs" />
     <Compile Include="Npcs\Promotion Centre\[10001] Warrior God.cs" />
     <Compile Include="Npcs\Promotion Centre\[10022] Trojan Star.cs" />
+    <Compile Include="Npcs\Twin City\[31] Welcomer NPC.cs" />
     <Compile Include="Npcs\Twin City\[10021] ArenaGuard.cs" />
     <Compile Include="Npcs\Twin City\[42] Captain.cs" />
     <Compile Include="Npcs\Twin City\[5030] Tinter.cs" />
@@ -355,6 +360,7 @@
     <Compile Include="Npcs\Twin City\[43] CaptainLi.cs" />
     <Compile Include="Npcs\Twin City\[600075] BoxerHuang.cs" />
     <Compile Include="Npcs\Twin City\[40] Warehouse.cs" />
+    <Compile Include="Npcs\Twin City\[8] Warehouse.cs" />
     <Compile Include="Npcs\Phoenix Castle\[2002] Conductress.cs" />
     <Compile Include="Npcs\INpc.cs" />
     <Compile Include="Npcs\Manager.cs" />
