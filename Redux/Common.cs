@@ -33,7 +33,17 @@ namespace Redux
                 LoadHeight = false,
                 Threading = true,
             };
-            MapService.Load();
+            try
+            {
+                MapService.Load();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("TinyMap load failed: " + ex.Message);
+                // Fallback to empty map data so the server can start; validate files later.
+                MapService.MapData = MapService.MapData ?? new Dictionary<ushort, TinyMap.TinyMap>();
+                MapService.Loaded = true;
+            }
         }
 
         #region Variables
