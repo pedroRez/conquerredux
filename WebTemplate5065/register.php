@@ -33,7 +33,7 @@ if ($formTimestamp <= 0 || (time() - (int) floor($formTimestamp / 1000)) < 3) {
     echo json_encode(['error' => 'Formulário enviado rápido demais. Confirme que não é um robô e tente novamente.']);
     exit;
 }
-
+/*
 $captchaResponse = $_POST['h-captcha-response'] ?? '';
 $captchaSecret = getenv('HCAPTCHA_SECRET');
 
@@ -68,7 +68,7 @@ if (!$captchaPayload || empty($captchaPayload['success'])) {
     http_response_code(400);
     echo json_encode(['error' => 'Não foi possível validar o hCaptcha. Tente novamente.']);
     exit;
-}
+}*/
 
 $username = trim($_POST['username']);
 $email = trim($_POST['email']);
