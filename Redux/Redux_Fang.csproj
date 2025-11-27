@@ -329,9 +329,7 @@
     <Compile Include="Structures\GuildAttr.cs" />
     <Compile Include="Structures\Guild.cs" />
     <Compile Include="Managers\Trade.cs" />
-    <Compile Include="Managers\EventRewardManager.cs" />
     <Compile Include="Threading\CombatThread.cs" />
-    <Compile Include="Threading\EventRewardThread.cs" />
     <Compile Include="Threading\MonsterThread.cs" />
     <Compile Include="Threading\PacketThread.cs" />
     <Compile Include="Threading\ThreadBase.cs" />

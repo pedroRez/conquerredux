@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Redux.Database.Repositories;
 using Redux.Network;
 using Redux.Utility;
 using Redux.Packets.Game;
@@ -14,11 +13,6 @@ namespace Redux.Game_Server
     #region Game Server
     public unsafe sealed class GameServer
     {
-        public static EventParticipationRepository EventRepository
-        {
-            get { return Database.ServerDatabase.Context.EventParticipation; }
-        }
-
         #region Constructor
         public GameServer(string name, int port)
         {
@@ -38,9 +32,6 @@ namespace Redux.Game_Server
             var t = new Threading.WorldThread();
             t.CreateThread();
 
-            //Start monster thread
-            var rewardThread = new Threading.EventRewardThread();
-            rewardThread.CreateThread();
         }
         #endregion
         #region Client Connect

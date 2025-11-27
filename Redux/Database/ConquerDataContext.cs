@@ -37,16 +37,10 @@ namespace Redux.Database
         private LevExpRepository _LevExpRepository;
         private BugReportRepository _bugReportRepository;
         private TaskRepository _taskRepository;
-        private EventParticipationRepository _eventParticipationRepository;
 
         public MineDropRepository MineDrop
         {
             get { return _MineDropRepository ?? (_MineDropRepository = new MineDropRepository()); }
-        }
-
-        public EventParticipationRepository EventParticipation
-        {
-            get { return _eventParticipationRepository ?? (_eventParticipationRepository = new EventParticipationRepository()); }
         }
 
         public NobilityRepository Nobility

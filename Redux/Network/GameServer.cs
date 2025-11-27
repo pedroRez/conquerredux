@@ -14,7 +14,7 @@ namespace Redux.Game_Server
     #region Game Server
     public unsafe sealed class GameServer
     {
-        public ThreadBase PacketThread, WorldThread, CombatThread, MonsterThread, EventRewardThread;
+        public ThreadBase PacketThread, WorldThread, CombatThread, MonsterThread;
         #region Constructor
         public GameServer(string name, int port)
         {
@@ -45,9 +45,6 @@ namespace Redux.Game_Server
             //Start monster thread
             MonsterThread = new Threading.MonsterThread();
             MonsterThread.CreateThread();
-
-            EventRewardThread = new Threading.EventRewardThread();
-            EventRewardThread.CreateThread();
 
             GuildManager.Initialize();
 

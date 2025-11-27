@@ -92,9 +92,6 @@
     <Compile Include="Cryptography\PasswordCryptography.cs" />
     <Compile Include="Database\ConquerDataContext.cs" />
     <Compile Include="Database\DatabaseMigrator.cs" />
-    <Compile Include="Database\Models\EventConfig.cs" />
-    <Compile Include="Database\Models\EventEntry.cs" />
-    <Compile Include="Database\Models\EventReward.cs" />
     <Compile Include="Database\Domain\DbTask.cs" />
     <Compile Include="Database\Domain\DbBugReport.cs" />
     <Compile Include="Database\Domain\DbLevExp.cs" />
@@ -152,7 +149,6 @@
     <Compile Include="Database\Repositories\MonsterTypeRepository.cs" />
     <Compile Include="Database\Repositories\ItemLogRepository.cs" />
     <Compile Include="Database\Repositories\NpcRepository.cs" />
-    <Compile Include="Database\Repositories\EventParticipationRepository.cs" />
     <Compile Include="Database\Repositories\MapRepository.cs" />
     <Compile Include="Database\Repositories\PassageRepository.cs" />
     <Compile Include="Database\Repositories\IRepository.cs" />
@@ -326,7 +322,6 @@
     <Compile Include="Npcs\Market\[3600] Alex - First Reborn.cs" />
     <Compile Include="Npcs\Market\[2071] CPAdmin.cs" />
     <Compile Include="Npcs\Market\[5004] MillionareLee.cs" />
-    <Compile Include="Npcs\Market\[923] LadyLuck.cs" />
     <Compile Include="Npcs\Market\[4450] Market Controller.cs" />
     <Compile Include="Npcs\Market\[44] Warehouse.cs" />
     <Compile Include="Npcs\Market\[7050] Equipment Master.cs" />
@@ -439,15 +434,11 @@
     <Compile Include="Structures\ConquerProficiency.cs" />
     <Compile Include="Structures\ConquerSkill.cs" />
     <Compile Include="Events\EventNormalizationManager.cs" />
-    <Compile Include="Events\EventParticipationHandlers.cs" />
     <Compile Include="Objects\GroundItem.cs" />
     <Compile Include="Structures\GuildAttr.cs" />
     <Compile Include="Structures\Guild.cs" />
     <Compile Include="Managers\Trade.cs" />
-    <Compile Include="Managers\EventRewardManager.cs" />
-    <Compile Include="Managers\EventManager.cs" />
     <Compile Include="Threading\CombatThread.cs" />
-    <Compile Include="Threading\EventRewardThread.cs" />
     <Compile Include="Threading\MonsterThread.cs" />
     <Compile Include="Threading\PacketThread.cs" />
     <Compile Include="Threading\ThreadBase.cs" />
@@ -539,15 +530,9 @@
     <EmbeddedResource Include="Database\Mappings\DbGuildAttr.hbm.xml" />
     <EmbeddedResource Include="Database\Mappings\DbGuild.hbm.xml" />
     <EmbeddedResource Include="Database\Mappings\DbAssociate.hbm.xml" />
-    <EmbeddedResource Include="Database\Mappings\EventConfig.hbm.xml" />
-    <EmbeddedResource Include="Database\Mappings\EventEntry.hbm.xml" />
-    <EmbeddedResource Include="Database\Mappings\EventReward.hbm.xml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Configuration\extra-spawns.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Database\Scripts\EventTables.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
