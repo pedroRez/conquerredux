@@ -60,13 +60,14 @@ namespace Redux.Game_Server
             SpawnPacket.StatusEffects = 0;
             ClientEffects.Clear();
             Direction = (byte)Common.Random.Next(9);
-            //Pull a new location for us that fits within spawn grounds
-            var loc = new Point(Common.Random.Next(Owner.TopLeft.X, Owner.BottomRight.X), Common.Random.Next(Owner.TopLeft.Y, Owner.BottomRight.Y));
+            //Pull a new location for us that fits within spawn grounds. Bounds are inclusive
+            //so we can cover the full rectangle without starving small spawn areas.
+            var loc = GetRandomSpawnLocation();
             var loop = 0;
             while (!Map.IsValidMonsterLocation(loc))
             {
                 loop++;
-                loc = new Point(Common.Random.Next(Owner.TopLeft.X, Owner.BottomRight.X), Common.Random.Next(Owner.TopLeft.Y, Owner.BottomRight.Y));
+                loc = GetRandomSpawnLocation();
                 if (loop > 100)
                 {
                     Console.WriteLine("Error assigning monster spawn! Monster will not be revived");
@@ -95,6 +96,21 @@ namespace Redux.Game_Server
             Owner.AliveMembers.TryAdd(UID, this);
             if (!Alive)
                 Console.WriteLine("Revived a monster that is still dead! {0}", UID);
+        }
+
+        private Point GetRandomSpawnLocation()
+        {
+            var minX = Math.Min(Owner.TopLeft.X, Owner.BottomRight.X);
+            var maxX = Math.Max(Owner.TopLeft.X, Owner.BottomRight.X);
+            var minY = Math.Min(Owner.TopLeft.Y, Owner.BottomRight.Y);
+            var maxY = Math.Max(Owner.TopLeft.Y, Owner.BottomRight.Y);
+
+            // Random.Next is exclusive on the max value, so we add 1 to cover the full span.
+            // If the spawn is defined on a single tile, clamp the range to that location.
+            var exclusiveMaxX = Math.Max(minX + 1, maxX + 1);
+            var exclusiveMaxY = Math.Max(minY + 1, maxY + 1);
+
+            return new Point(Common.Random.Next(minX, exclusiveMaxX), Common.Random.Next(minY, exclusiveMaxY));
         }
 
         public void Faded()

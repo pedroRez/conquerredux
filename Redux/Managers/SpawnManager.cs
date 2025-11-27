@@ -49,8 +49,7 @@ namespace Redux.Managers
         {
             BaseType = ServerDatabase.Context.Monstertype.GetById(_baseSpawn.MonsterType);
             DropRules = ServerDatabase.Context.DropRules.GetRulesByMonsterType(_baseSpawn.MonsterType).ToList();
-            TopLeft = new Point(_baseSpawn.X1, _baseSpawn.Y1);
-            BottomRight = new Point(_baseSpawn.X2, _baseSpawn.Y2);
+            NormalizeSpawnBounds(_baseSpawn.X1, _baseSpawn.Y1, _baseSpawn.X2, _baseSpawn.Y2);
             Frequency = _baseSpawn.Frequency;
             AmountPer = ApplySpawnMultiplier(_baseSpawn.AmountPer);
             AmountMax = ApplySpawnMultiplier(_baseSpawn.AmountMax);
@@ -60,6 +59,18 @@ namespace Redux.Managers
             Map = _map;
             for (int i = 0; i < AmountMax; i++)
                 DeadMembers.Enqueue(new Monster(BaseType, this));
+        }
+
+        private void NormalizeSpawnBounds(int x1, int y1, int x2, int y2)
+        {
+            var minX = Math.Min(x1, x2);
+            var maxX = Math.Max(x1, x2);
+            var minY = Math.Min(y1, y2);
+            var maxY = Math.Max(y1, y2);
+
+            // Store the bounds as inclusive corners so downstream code can randomize safely.
+            TopLeft = new Point(minX, minY);
+            BottomRight = new Point(maxX, maxY);
         }
 
         private int ApplySpawnMultiplier(int baseAmount)
