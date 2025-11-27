@@ -24,7 +24,8 @@ namespace Redux
             _taoistManaBonus = new[] { 100, 100, 300, 400, 500, 600 };
             MapService = new TinyMapServer
             {
-                ConquerDirectory = "",
+                // Ajuste este caminho para a pasta do cliente que contém as DMaps (ex.: C:\Users\Theo\Desktop\Theo\5065)
+                ConquerDirectory = @"C:\Users\Theo\Desktop\Theo\5065",
                 ExtractDMaps = false,
                 LoadPortals = true,
                 // Height data in some dmaps is incomplete, which can incorrectly block
@@ -33,17 +34,7 @@ namespace Redux
                 LoadHeight = false,
                 Threading = true,
             };
-            try
-            {
-                MapService.Load();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("TinyMap load failed: " + ex.Message);
-                // Fallback to empty map data so the server can start; validate files later.
-                MapService.MapData = MapService.MapData ?? new Dictionary<ushort, TinyMap.TinyMap>();
-                MapService.Loaded = true;
-            }
+            MapService.Load();
         }
 
         #region Variables
