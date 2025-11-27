@@ -13,16 +13,16 @@ using Redux.Packets.Game;
 namespace Redux.Npcs
 {
     /// <summary>
-    /// Handles NPC usage for [101617] Boxer
+    /// Handles NPC usage for [101607] Boxer
     /// Written by Aceking 9-24-13
     /// </summary>
-    public class NPC_101617 : INpc
+    public class NPC_101607 : INpc
     {
 
-        public NPC_101617(Game_Server.Player _client)
+        public NPC_101607(Game_Server.Player _client)
             :base (_client)
     	{
-    		ID = 101617;	
+    		ID = 101607;	
 			Face = 20;    
     	}
 

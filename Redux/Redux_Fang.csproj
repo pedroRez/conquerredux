@@ -242,7 +242,7 @@
     <Compile Include="Npcs\Phoenix Castle\[48] Warehouse.cs" />
     <Compile Include="Npcs\Promotion Centre\[10022] Trojan Star.cs" />
     <Compile Include="Npcs\Twin City\[10003] GuildDirector.cs" />
-    <Compile Include="Npcs\Twin City\[101617] Boxer.cs" />
+    <Compile Include="Npcs\Twin City\[101607] Boxer.cs" />
     <Compile Include="Npcs\Twin City\[4293] Mine Admin.cs" />
     <Compile Include="Npcs\Twin City\[10054] General Peace.cs" />
     <Compile Include="Npcs\Twin City\[10050] Conductress.cs" />

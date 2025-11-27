@@ -294,7 +294,7 @@
     <Compile Include="Npcs\Bird Island\[50021] Minner.cs" />
     <Compile Include="Npcs\Desert City\[10011] Warehouse.cs" />
     <Compile Include="Npcs\Desert City\[101619] Boxer.cs" />
-    <Compile Include="Npcs\Desert City\[126] Assistant.cs" />
+    <Compile Include="Npcs\Desert City\[127] Assistant.cs" />
     <Compile Include="Npcs\Desert City\[46] Warehouse.cs" />
     <Compile Include="Npcs\Desert City\[10051] Conductress.cs" />
     <Compile Include="Npcs\Desert City\[102091] Guild Conductress 2.cs" />
@@ -327,7 +327,6 @@
     <Compile Include="Npcs\Market\[2071] CPAdmin.cs" />
     <Compile Include="Npcs\Market\[5004] MillionareLee.cs" />
     <Compile Include="Npcs\Market\[923] LadyLuck.cs" />
-    <Compile Include="Npcs\Market\[45] Market Controller.cs" />
     <Compile Include="Npcs\Market\[4450] Market Controller.cs" />
     <Compile Include="Npcs\Market\[44] Warehouse.cs" />
     <Compile Include="Npcs\Market\[7050] Equipment Master.cs" />
@@ -352,7 +351,7 @@
     <Compile Include="Npcs\Twin City\[20005] Celestine.cs" />
     <Compile Include="Npcs\Twin City\[10002] Barber.cs" />
     <Compile Include="Npcs\Twin City\[10003] GuildDirector.cs" />
-    <Compile Include="Npcs\Twin City\[101617] Boxer.cs" />
+    <Compile Include="Npcs\Twin City\[101607] Boxer.cs" />
     <Compile Include="Npcs\Twin City\[4293] Mine Admin.cs" />
     <Compile Include="Npcs\Twin City\[10054] General Peace.cs" />
     <Compile Include="Npcs\Twin City\[10050] Conductress.cs" />
