@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using Redux.Utility;
 using System.Diagnostics;
@@ -23,10 +23,26 @@ namespace Redux
             DeltaY = new sbyte[] { 1, 1, 0, -1, -1, -1, 0, 1, 0 };
             _trojanLifeBonus = new[] { 100, 105, 108, 110, 112, 115 };
             _taoistManaBonus = new[] { 100, 100, 300, 400, 500, 600 };
+            var conquerDirectory = Environment.GetEnvironmentVariable("REDUX_CONQUER_DIR");
+            if (string.IsNullOrWhiteSpace(conquerDirectory))
+            {
+                conquerDirectory = @"C:\Users\Theo\Desktop\Theo\5065";
+                Console.WriteLine("Map root not configured. Using default path: {0}", conquerDirectory);
+            }
+            else
+            {
+                Console.WriteLine("Using map root from REDUX_CONQUER_DIR: {0}", conquerDirectory);
+            }
+
+            if (!Directory.Exists(conquerDirectory))
+            {
+                Console.WriteLine("WARNING: Map root '{0}' not found. Place the client files (map\\*.DMap, including kunlun) there or update REDUX_CONQUER_DIR.", conquerDirectory);
+            }
+
             MapService = new TinyMapServer
             {
-                // Ajuste este caminho para a pasta do cliente que contém as DMaps (ex.: C:\Users\Theo\Desktop\Theo\5065)
-                ConquerDirectory = @"C:\Users\Theo\Desktop\Theo\5065",
+                // Ajuste este caminho para a pasta do cliente que contem as DMaps (ex.: C:\Users\Theo\Desktop\Theo\5065)
+                ConquerDirectory = conquerDirectory,
                 ExtractDMaps = false,
                 LoadPortals = true,
                 // Height data in some dmaps is incomplete, which can incorrectly block

@@ -575,7 +575,11 @@ namespace Redux.Managers
                 case SkillSort.StatusAttack:
                     DealSkillDamage();
                     break;
-                // somehow it is being called twice therefore using a break
+                case SkillSort.AttachStatus:
+                case SkillSort.DetachStatus:
+                case SkillSort.HealTarget:
+                case SkillSort.AddMana:
+                case SkillSort.Transform:
                 case SkillSort.CallPet:
                     break;
                 default:
