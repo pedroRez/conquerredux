@@ -27,6 +27,11 @@ namespace Redux.Managers
             return Repository.ListConfigsToDraw(referenceTime);
         }
 
+        public static IList<EventConfig> ListActiveConfigs(DateTime referenceTime)
+        {
+            return Repository.ListActiveConfigs(referenceTime);
+        }
+
         public static EventEntry RegisterEntry(uint configId, uint characterId, string entryType, ushort maxTicketsPerPlayer)
         {
             return Repository.RegisterEntry(configId, characterId, entryType, maxTicketsPerPlayer);
@@ -52,6 +57,11 @@ namespace Redux.Managers
             return Repository.GetEntry(entryId);
         }
 
+        public static EventEntry FindEntryForPlayer(uint configId, uint characterId)
+        {
+            return Repository.GetEntryForPlayer(configId, characterId);
+        }
+
         public static IList<EventEntry> ListEntries(uint configId)
         {
             return Repository.ListEntries(configId);
@@ -65,6 +75,11 @@ namespace Redux.Managers
         public static IList<EventReward> ListUndeliveredRewards(uint characterId)
         {
             return Repository.ListUndeliveredRewards(characterId);
+        }
+
+        public static IList<EventReward> ListRewardsByCharacter(uint characterId, int limit = 20)
+        {
+            return Repository.ListRewardsByCharacter(characterId, limit);
         }
 
         public static int MarkDelivered(IEnumerable<uint> rewardIds, DateTime deliveredAt)
