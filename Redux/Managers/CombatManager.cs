@@ -925,7 +925,7 @@ namespace Redux.Managers
                     }
                     if (item == null)
                         return false;
-                    if (item.Durability - _magicType.UseItemNum < 0)
+                    if (item.Durability <= 0)
                         return false;
                 }
             }
@@ -961,7 +961,8 @@ namespace Redux.Managers
                         return false;
 
                     var previousArrowType = item.StaticID;
-                    item.Durability -= _magicType.UseItemNum;
+                    var arrowsToConsume = Math.Min(item.Durability, _magicType.UseItemNum);
+                    item.Durability -= arrowsToConsume;
                     owner.Send(ItemInformationPacket.Create(item, ItemInfoAction.Update));
                     if (item.Durability == 0)
                     {
