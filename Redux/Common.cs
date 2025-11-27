@@ -27,7 +27,10 @@ namespace Redux
                 ConquerDirectory = "",
                 ExtractDMaps = false,
                 LoadPortals = true,
-                LoadHeight = true,
+                // Height data in some dmaps is incomplete, which can incorrectly block
+                // movement (for example, crossing bridges). Skip height validation so
+                // passability relies on tile flags alone.
+                LoadHeight = false,
                 Threading = true,
             };
             MapService.Load();
