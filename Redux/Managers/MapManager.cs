@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Redux.Space;
 using Redux.Game_Server;
+using Redux.Packets.Game;
 
 namespace Redux.Managers
 {
@@ -171,6 +172,9 @@ namespace Redux.Managers
             {
                 if (p is Player && !p.VisibleObjects.ContainsKey(item.UID))
                 {
+                    var displayName = item.Item.GetDisplayNameWithQuality();
+                    if (!string.IsNullOrEmpty(displayName))
+                        ((Player)p).Send(StringsPacket.Create(item.UID, Enum.StringAction.MapEffect, displayName));
                     ((Player)p).Send(item.SpawnPacket);
                     p.VisibleObjects.TryAdd(item.UID, item.UID);
                 }

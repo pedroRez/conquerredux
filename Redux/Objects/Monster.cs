@@ -211,7 +211,7 @@ namespace Redux.Game_Server
             #endregion
 
             #region Drop Money
-            while (Common.PercentSuccess(20) && dropCount < 4)
+            while (Common.PercentSuccess(Constants.CHANCE_GOLD_DROP) && dropCount < 4)
             {
                 uint value = (uint)Common.Random.Next(BaseMonster.Level, (int)(BaseMonster.Level * 15 * Constants.GOLD_RATE));
                 uint itemID = 1090000;
