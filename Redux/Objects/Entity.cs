@@ -202,6 +202,17 @@ namespace Redux.Game_Server
                 }
                 else
                 {
+                    if (PlayerManager.Players.ContainsKey(_attacker))
+                    {
+                        var attacker = Map.Search<Entity>(_attacker);
+                        var ownerPlayer = attacker as Player;
+                        if (attacker is Pet && (attacker as Pet).PetOwner != null)
+                            ownerPlayer = (attacker as Pet).PetOwner;
+
+                        if (ownerPlayer != null)
+                            ownerPlayer.GainXpProgress(10);
+                    }
+
                     if (this is Monster && PlayerManager.Players.ContainsKey(_attacker))
                         if ((this as Monster).BaseMonster.ID == 900)//Guard
                         {
@@ -292,6 +303,8 @@ namespace Redux.Game_Server
                 }
                 if (_effect == ClientEffect.XpStart)
                     Xp = 0;
+                else if (_effect == ClientEffect.Fly && HasStatus(Enum.ClientStatus.Flying))
+                    RemoveStatus(Enum.ClientStatus.Flying);
             }
             return success;
         }
@@ -314,6 +327,9 @@ namespace Redux.Game_Server
                     SendToScreen(SpawnPacket);
                 }
             }
+
+            if (success && _effect == ClientEffect.Fly)
+                AddStatus(Enum.ClientStatus.Flying, 1, _timeout);
 
             return success;
         }

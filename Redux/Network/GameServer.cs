@@ -1098,9 +1098,7 @@ namespace Redux.Game_Server
                         if (sellItem.Durability == 0)
                             sellPrice = 0;
                         else if (sellItem.Durability < sellItem.MaximumDurability)
-                        {
-                            sellPrice *= (uint)(sellItem.Durability / sellItem.MaximumDurability);
-                        }
+                            sellPrice = (uint)(sellPrice * ((double)sellItem.Durability / sellItem.MaximumDurability));
                         client.Money += sellPrice;
                         client.DeleteItem(sellItem);
                     }
