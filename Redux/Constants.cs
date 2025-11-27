@@ -46,12 +46,15 @@ namespace Redux
             CHANCE_SUPER = 0.3,
             CHANCE_PLUS = 2.0,
             CHANCE_METEOR = 0.8,
+            CHANCE_METEOR_HIGH_LEVEL = 0.3,
             CHANCE_DRAGONBALL = 0.08,
             CHANCE_GEAR_DROP = 25,
             CHANCE_GOLD_DROP = 18,
             CHANCE_POTION = 4,
             CHANCE_REFINED_GEM = 10,
             CHANCE_SUPER_GEM = 1;
+
+        public const byte METEOR_REDUCED_DROP_LEVEL = 100;
 
         public static bool DEBUG_MODE;
         public const byte RESPONSE_INVALID = 1,

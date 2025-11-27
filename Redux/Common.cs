@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using TinyMap;
+using System.IO;
 
 namespace Redux
 {
