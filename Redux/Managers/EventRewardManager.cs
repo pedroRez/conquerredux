@@ -42,7 +42,7 @@ namespace Redux.Managers
             if (eligibleEntries.Count == 0)
                 return;
 
-            var winnersCount = Math.Max(1, config.WinnersCount);
+            var winnersCount = Math.Max(1, (int)config.WinnersCount);
             winnersCount = Math.Min(winnersCount, eligibleEntries.Count);
 
             var winners = DrawWinners(eligibleEntries, winnersCount);
@@ -93,14 +93,14 @@ namespace Redux.Managers
 
         private static EventEntry DrawSingle(IList<EventEntry> pool)
         {
-            var totalTickets = pool.Sum(entry => Math.Max(1, entry.MiniObjectiveTickets));
+            var totalTickets = pool.Sum(entry => Math.Max(1, (int)entry.MiniObjectiveTickets));
             if (totalTickets <= 0)
                 return null;
 
             var roll = Common.Random.Next(totalTickets);
             foreach (var entry in pool)
             {
-                roll -= Math.Max(1, entry.MiniObjectiveTickets);
+                roll -= Math.Max(1, (int)entry.MiniObjectiveTickets);
                 if (roll < 0)
                     return entry;
             }

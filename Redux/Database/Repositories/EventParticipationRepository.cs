@@ -141,7 +141,7 @@ namespace Redux.Database.Repositories
                     return null;
 
                 var config = session.Get<EventConfig>(entry.EventConfigId);
-                var maxTickets = config?.MaxTicketsPerPlayer ?? 0;
+                var maxTickets = (int)(config?.MaxTicketsPerPlayer ?? 0);
 
                 var target = entry.MiniObjectiveTickets + amount;
                 if (maxTickets > 0)
@@ -268,7 +268,7 @@ namespace Redux.Database.Repositories
                     .OrderBy(reward => reward.GrantedAt).Desc();
 
                 if (limit > 0)
-                    query = query.Take(limit);
+                    return query.Take(limit).List();
 
                 return query.List();
             }
